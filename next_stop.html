@@ -484,6 +484,13 @@ const pick=a=>a[Math.floor(Math.random()*a.length)];
 
 let G=null;          // 현재 게임 상태
 let levelIdx=0;
+/* ===== 진행 저장 (localStorage · 같은 브라우저에서 유지) ===== */
+const SAVE_KEY='nextstop_save_v1';
+let SAVE={level:0,best:{}};
+function loadSave(){ try{ const s=localStorage.getItem(SAVE_KEY); if(s){ const o=JSON.parse(s); if(o&&typeof o==='object'){ SAVE.level=Math.max(0,Math.min((o.level|0),LEVELS.length-1)); SAVE.best=(o.best&&typeof o.best==='object')?o.best:{}; } } }catch(e){} }
+function saveSave(){ try{ localStorage.setItem(SAVE_KEY, JSON.stringify(SAVE)); }catch(e){} }
+loadSave();
+levelIdx=SAVE.level||0;
 let soundOn=true;
 let busy=false;      // 애니메이션 중 입력 잠금
 
@@ -729,6 +736,7 @@ function setHint(html){ const h=$('#hint'); if(h) h.innerHTML=html; }
 function startLevel(idx){
   busy=true;
   buildLevel(idx);
+  SAVE.level=idx; saveSave();
   $('#lvLabel').textContent=idx+1;
   const sg=G.L.sign||{ko:G.station,en:'',code:'',lineNo:G.L.lines[0]};
   const sl=LINES.find(x=>x.no===sg.lineNo)||LINES[0];
@@ -897,6 +905,7 @@ function checkWin(){
       let stars=3; if(pen>2)stars=2; if(pen>5)stars=1;
       {const star=f=>`<svg viewBox="0 0 24 24"><path d="M12 2.5l2.9 6.3 6.8.7-5.1 4.6 1.5 6.7L12 17.9 5.9 20.8l1.5-6.7L2.3 9.5l6.8-.7z" fill="${f?'#ffce3b':'#dfe6ee'}" stroke="${f?'#e9a800':'#c7d0da'}" stroke-width="1"/></svg>`;
   $('#winStars').innerHTML=[0,1,2].map(i=>star(i<stars)).join('');}
+      if(stars>(SAVE.best[levelIdx]||0)){ SAVE.best[levelIdx]=stars; } saveSave();
       $('#winTitle').textContent= (levelIdx>=LEVELS.length-1)?'전 노선 운행 완료!':'정차 완료!';
       $('#winMsg').textContent= (levelIdx>=LEVELS.length-1)
         ? '모든 역을 돌았어요! 최고의 기관사님'
@@ -944,7 +953,7 @@ function playIntro(after){
   const txt=$('#introText');
   txt.style.opacity='0';
   txt.animate([{opacity:0,transform:'scale(.8)'},{opacity:1,transform:'scale(1)'}],{duration:600,delay:600,fill:'forwards'});
-  setTimeout(()=>{ txt.textContent='첫 번째 역으로 출발! 🚇'; },2000);
+  setTimeout(()=>{ txt.textContent=(levelIdx+1)+'번째 역으로 출발! 🚇'; },2000);
   setTimeout(()=>{ after&&after(); },3400);
 }
 
@@ -966,13 +975,13 @@ function makeClouds(){
 /* ---------- 버튼 이벤트 ---------- */
 $('#title').addEventListener('click',()=>{
   try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();}catch(e){}
-  levelIdx=0;
+  levelIdx=SAVE.level||0;
   playIntro(()=>{ show('#game'); startLevel(levelIdx); });
 });
 $('#howClose').addEventListener('click',()=>$('#howOverlay').classList.remove('on'));
 $('#nextBtn').addEventListener('click',()=>{
   $('#winOverlay').classList.remove('on'); stopTicker();
-  if(levelIdx>=LEVELS.length-1){ levelIdx=0; show('#title'); }
+  if(levelIdx>=LEVELS.length-1){ levelIdx=0; SAVE.level=0; saveSave(); show('#title'); }
   else { levelIdx++; show('#game'); startLevel(levelIdx); }
 });
 function bonusTrain(){
