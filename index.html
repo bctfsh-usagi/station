@@ -8,104 +8,113 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="다음정류장은" />
   <meta name="mobile-web-app-capable" content="yes" />
-  <link rel="manifest" href="./manifest.json" />
-  <link rel="apple-touch-icon" href="./assets/icons/apple-touch-icon.png" />
+  <link rel="manifest" href="manifest.json" />
   <title>다음정류장은</title>
   <style>
-    :root{--bg:#0f172a;--ink:#172033;--safe-top:env(safe-area-inset-top);--safe-bottom:env(safe-area-inset-bottom);--vh:1vh}
+    :root{
+      --bg:#0f172a;--ink:#111827;--muted:#64748b;--line:#dbe3ec;--blue:#38bdf8;--safe-top:env(safe-area-inset-top);--safe-bottom:env(safe-area-inset-bottom);--vh:1vh
+    }
     *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
     html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);font-family:ui-rounded,-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR",system-ui,sans-serif;color:var(--ink);touch-action:manipulation}
     body{position:fixed;inset:0;width:100%}
-    .app{min-height:calc(var(--vh)*100);height:calc(var(--vh)*100);padding:calc(12px + var(--safe-top)) 14px calc(12px + var(--safe-bottom));background:radial-gradient(circle at 20% 5%,rgba(56,189,248,.25),transparent 32%),radial-gradient(circle at 90% 15%,rgba(167,139,250,.18),transparent 35%),linear-gradient(180deg,#111827,#162033 45%,#0f172a);display:grid;place-items:center}
-    .phone{width:min(100%,480px);height:100%;max-height:920px;display:grid;grid-template-rows:auto auto 1fr;gap:10px;position:relative}
-    .topbar{display:flex;align-items:center;justify-content:space-between;color:#fff;padding:2px 4px}.brand{display:flex;flex-direction:column;gap:2px}.brand b{font-size:clamp(20px,5.2vw,28px);letter-spacing:-.04em}.brand span{color:rgba(255,255,255,.68);font-size:12px}.pill{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.16);color:#fff;border-radius:999px;padding:8px 10px;font-size:12px;backdrop-filter:blur(12px)}
-    .hud{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}.stat{border-radius:18px;padding:10px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.14);color:#fff;box-shadow:0 8px 22px rgba(0,0,0,.14)}.stat small{display:block;color:rgba(255,255,255,.65);font-size:11px;margin-bottom:3px}.stat strong{font-size:clamp(16px,4.2vw,21px)}
-    .board{min-height:0;border-radius:28px;background:linear-gradient(180deg,#f8fafc,#e2e8f0);box-shadow:0 18px 50px rgba(2,6,23,.24);padding:12px;display:grid;grid-template-rows:auto 1fr auto;gap:10px;overflow:hidden;position:relative}
-    .station-sign{display:flex;align-items:center;justify-content:space-between;gap:8px;background:#0f172a;color:#fff;border-radius:18px;padding:10px 12px}.station-name{font-weight:900;font-size:clamp(16px,4.6vw,22px);letter-spacing:-.04em}.station-sub{font-size:11px;color:rgba(255,255,255,.62);text-align:right}
-    .play-area{min-height:0;display:grid;grid-template-rows:.82fr 1.05fr;gap:10px}.train-wrap{min-height:0;border-radius:24px;background:linear-gradient(90deg,rgba(148,163,184,.28) 1px,transparent 1px),linear-gradient(180deg,#cbd5e1,#f1f5f9);background-size:24px 100%,100% 100%;overflow:hidden;padding:10px;display:grid;grid-template-rows:auto 1fr;gap:8px}.rail-label{display:flex;justify-content:space-between;color:#334155;font-size:12px;font-weight:800}.train{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;min-height:0}
-    .car{border:3px solid #1e293b;background:linear-gradient(180deg,#f8fafc,#cbd5e1);border-radius:18px 18px 12px 12px;position:relative;padding:7px;display:grid;grid-template-rows:auto 1fr auto;gap:5px;box-shadow:0 8px 18px rgba(15,23,42,.18);cursor:pointer;overflow:hidden}.car:before{content:"";position:absolute;left:12%;right:12%;top:8px;height:9px;background:#38bdf8;border-radius:999px;opacity:.8}.car:active{transform:translateY(-3px)}.car.full{border-color:#fb7185}.car-title{margin-top:8px;display:flex;justify-content:space-between;font-size:10px;color:#475569;font-weight:900}.seats{display:flex;flex-wrap:wrap;align-content:center;justify-content:center;gap:3px;min-height:0}.mini{width:clamp(16px,4.6vw,26px);height:clamp(16px,4.6vw,26px);object-fit:contain;filter:drop-shadow(0 2px 2px rgba(15,23,42,.22))}.cap{text-align:center;font-size:10px;color:#475569;font-weight:800}
-    .platform{min-height:0;border-radius:24px;background:#e5e7eb;border:1px solid rgba(15,23,42,.08);padding:10px;display:grid;grid-template-rows:auto 1fr;gap:8px;overflow:hidden;position:relative}.platform:before{content:"";position:absolute;left:0;right:0;top:0;height:10px;background:repeating-linear-gradient(90deg,#facc15 0 18px,#111827 18px 30px)}.queue-head{margin-top:8px;display:flex;justify-content:space-between;gap:8px;font-size:12px;color:#475569;font-weight:900}.queue-head span:last-child{color:#0f172a}.passengers{min-height:0;display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(6px,1.8vw,10px);align-content:center}
-    .person{aspect-ratio:.84/1.16;border:none;border-radius:18px;background:linear-gradient(180deg,#fff,#f8fafc);box-shadow:0 7px 14px rgba(15,23,42,.14);display:grid;place-items:center;cursor:pointer;position:relative;transition:.14s transform,.14s opacity,.14s box-shadow;overflow:hidden}.person:active{transform:scale(.94)}.person.selected{transform:translateY(-5px) scale(1.05);box-shadow:0 12px 22px rgba(14,165,233,.35);outline:3px solid #38bdf8}.person.boarded{pointer-events:none;opacity:0;transform:scale(.2)}.person-img{width:86%;height:82%;object-fit:contain;z-index:2;filter:drop-shadow(0 5px 4px rgba(15,23,42,.18))}.person small{position:absolute;bottom:5px;left:0;right:0;text-align:center;color:#334155;font-size:9px;font-weight:900;z-index:3}.tag{position:absolute;top:5px;right:5px;font-size:10px;background:rgba(255,255,255,.88);border-radius:999px;padding:1px 5px;font-weight:900;color:#0f172a;z-index:4}.gender-badge{position:absolute;top:5px;left:5px;width:18px;height:18px;border-radius:50%;background:rgba(255,255,255,.92);display:grid;place-items:center;font-size:11px;z-index:4;box-shadow:0 2px 6px rgba(15,23,42,.12)}
-    .controls{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}button.action{appearance:none;border:none;border-radius:18px;padding:13px 8px;font-size:13px;font-weight:900;color:#0f172a;background:#fff;box-shadow:0 10px 24px rgba(15,23,42,.17);cursor:pointer}button.primary{background:#38bdf8;color:#082f49}button.dark{background:#111827;color:#fff}
-    .toast{position:absolute;left:50%;bottom:calc(84px + var(--safe-bottom));transform:translateX(-50%) translateY(20px);background:rgba(15,23,42,.92);color:#fff;padding:10px 14px;border-radius:999px;font-size:13px;font-weight:800;opacity:0;transition:.24s;pointer-events:none;white-space:nowrap;z-index:20}.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-    .modal{position:absolute;inset:0;background:rgba(15,23,42,.58);display:none;align-items:center;justify-content:center;padding:18px;z-index:30;backdrop-filter:blur(8px)}.modal.show{display:flex}.card{width:min(100%,360px);background:#fff;border-radius:28px;padding:22px;text-align:center;box-shadow:0 18px 50px rgba(2,6,23,.24)}.card h2{margin:0 0 8px;font-size:25px;letter-spacing:-.04em}.card p{margin:0 0 16px;color:#64748b;line-height:1.5;font-size:14px}.stars{font-size:34px;margin:10px 0 14px;letter-spacing:2px}
-    @media(min-width:390px){.passengers{grid-template-columns:repeat(5,1fr)}}@media(max-height:690px){.app{padding-top:calc(8px + var(--safe-top))}.brand span,.pill{display:none}.board{padding:9px;gap:8px}.station-sign{padding:8px 10px}.controls button.action{padding:10px 6px}.person{border-radius:14px}}@media(min-width:720px){body{position:static;overflow:auto}.app{min-height:100vh;height:auto}.phone{height:min(920px,96vh)}}
+    button{font:inherit}
+    .app{height:calc(var(--vh)*100);padding:calc(10px + var(--safe-top)) 12px calc(10px + var(--safe-bottom));background:radial-gradient(circle at 12% 0,rgba(56,189,248,.25),transparent 34%),radial-gradient(circle at 88% 8%,rgba(168,85,247,.2),transparent 32%),linear-gradient(180deg,#111827,#172033 48%,#0f172a);display:grid;place-items:center;overflow:hidden}
+    .phone{width:min(100%,500px);height:100%;max-height:930px;display:grid;grid-template-rows:auto auto 1fr;gap:8px;position:relative}
+    .top{display:flex;align-items:center;justify-content:space-between;color:white;padding:0 4px}
+    .title b{display:block;font-size:clamp(24px,7vw,42px);letter-spacing:-.07em;line-height:1}.title span{display:block;color:rgba(255,255,255,.68);font-size:13px;margin-top:3px}.pwa{color:white;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.16);border-radius:999px;padding:8px 12px;font-weight:800;font-size:13px;white-space:nowrap}
+    .hud{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.stat{border-radius:20px;padding:10px 12px;background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.14);color:white}.stat small{display:block;color:rgba(255,255,255,.66);font-size:12px}.stat strong{display:block;font-size:clamp(22px,6vw,33px);margin-top:3px;line-height:1}
+    .board{min-height:0;background:#f1f5f9;border-radius:30px;padding:12px;display:grid;grid-template-rows:auto .92fr 1fr auto;gap:10px;box-shadow:0 18px 48px rgba(2,6,23,.26);overflow:hidden}
+    .sign{background:#0f172a;color:white;border-radius:24px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px}.station{font-size:clamp(25px,7vw,38px);font-weight:950;letter-spacing:-.07em;line-height:1}.rule{margin-top:5px;color:rgba(255,255,255,.68);font-size:13px}.line{text-align:right;color:rgba(255,255,255,.72);font-size:13px}.line b{display:block;color:white;font-size:18px;margin-top:2px}
+    .trainZone{min-height:0;border-radius:26px;background:linear-gradient(90deg,rgba(100,116,139,.18) 1px,transparent 1px),linear-gradient(180deg,#dbe3ec,#eef3f8);background-size:24px 100%,100% 100%;padding:10px;display:grid;grid-template-rows:auto 1fr;gap:7px;overflow:hidden}.zoneHead{display:flex;align-items:center;justify-content:space-between;font-weight:950;color:#334155;font-size:13px}.phase{display:inline-flex;align-items:center;gap:5px;padding:5px 9px;border-radius:999px;background:white;box-shadow:0 4px 12px rgba(15,23,42,.08);color:#0f172a}.phase.exit{color:#b45309;background:#fffbeb}.phase.board{color:#0369a1;background:#e0f2fe}
+    .cars{min-height:0;display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.car{min-width:0;border:3px solid #1e293b;border-radius:20px;background:linear-gradient(180deg,#fff,#e2e8f0);padding:7px;display:grid;grid-template-rows:auto 1fr auto;gap:5px;position:relative;overflow:hidden}.car:before{content:"";position:absolute;left:14%;right:14%;top:8px;height:8px;background:#55c7f5;border-radius:999px}.carTop{margin-top:8px;display:flex;align-items:center;justify-content:space-between;gap:4px;font-size:11px;font-weight:950;color:#475569}.carName{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.seatGrid{min-height:0;display:grid;grid-template-columns:repeat(2,1fr);grid-auto-rows:1fr;gap:4px;align-content:center}.seat{position:relative;border:1px dashed rgba(71,85,105,.25);border-radius:12px;background:rgba(255,255,255,.55);display:grid;place-items:center;overflow:hidden;min-height:38px}.rider{appearance:none;border:0;background:transparent;width:100%;height:100%;padding:1px;display:grid;place-items:center;position:relative;cursor:pointer}.rider img{max-width:105%;max-height:105%;object-fit:contain;filter:drop-shadow(0 3px 4px rgba(15,23,42,.18))}.rider.exitNow{animation:pulse 1s infinite}.exitBadge{position:absolute;top:1px;right:1px;background:#f59e0b;color:#111827;border:1px solid rgba(0,0,0,.08);border-radius:999px;padding:1px 4px;font-size:9px;font-weight:950;box-shadow:0 2px 5px rgba(15,23,42,.16)}.empty{color:#94a3b8;font-size:11px;font-weight:900}.carFoot{text-align:center;color:#475569;font-weight:950;font-size:11px}.car.canBoard{border-color:#0ea5e9;box-shadow:0 0 0 3px rgba(14,165,233,.15)}.car.full{border-color:#f43f5e}
+    @keyframes pulse{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+    .platform{min-height:0;border-radius:26px;background:#e5e7eb;border:1px solid rgba(15,23,42,.08);padding:10px;display:grid;grid-template-rows:auto 1fr;gap:8px;overflow:hidden;position:relative}.platform:before{content:"";position:absolute;left:0;right:0;top:0;height:10px;background:repeating-linear-gradient(90deg,#facc15 0 18px,#111827 18px 30px)}.platform .zoneHead{margin-top:8px}.waiting{min-height:0;display:grid;grid-template-columns:repeat(4,1fr);gap:8px;align-content:start;overflow:hidden}.person{appearance:none;border:0;border-radius:18px;background:linear-gradient(180deg,#fff,#f8fafc);box-shadow:0 8px 16px rgba(15,23,42,.13);padding:4px 4px 6px;display:grid;grid-template-rows:1fr auto;gap:2px;min-height:108px;cursor:pointer;position:relative;overflow:hidden}.person:active{transform:scale(.96)}.person.selected{outline:3px solid #38bdf8;box-shadow:0 12px 24px rgba(14,165,233,.25);transform:translateY(-2px)}.person img{width:100%;height:76px;object-fit:contain;filter:drop-shadow(0 4px 5px rgba(15,23,42,.16))}.dest{font-weight:950;font-size:12px;color:#0f172a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center}.swatch{position:absolute;left:0;right:0;bottom:0;height:4px;background:var(--swatch)}
+    .actions{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}.action{appearance:none;border:0;border-radius:19px;padding:14px 8px;font-weight:950;background:white;color:#0f172a;box-shadow:0 8px 18px rgba(15,23,42,.12)}.action.primary{background:#38bdf8;color:#082f49}.action.dark{background:#0f172a;color:white}.action:active{transform:translateY(1px)}
+    .toast{position:absolute;left:50%;bottom:calc(80px + var(--safe-bottom));transform:translateX(-50%) translateY(18px);background:rgba(15,23,42,.94);color:white;border-radius:999px;padding:10px 14px;font-weight:900;font-size:13px;white-space:nowrap;opacity:0;pointer-events:none;transition:.22s;z-index:20}.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}.modal{position:absolute;inset:0;background:rgba(15,23,42,.58);display:none;align-items:center;justify-content:center;padding:18px;backdrop-filter:blur(8px);z-index:30}.modal.show{display:flex}.card{width:min(100%,360px);background:white;border-radius:28px;padding:22px;text-align:center;box-shadow:0 18px 50px rgba(2,6,23,.26)}.card h2{margin:0 0 8px;font-size:26px;letter-spacing:-.05em}.card p{margin:0;color:#64748b;line-height:1.45;font-size:14px}.stars{font-size:34px;margin:12px 0 16px;color:#f59e0b;letter-spacing:2px}
+    @media(max-width:370px){.waiting{grid-template-columns:repeat(3,1fr)}.person{min-height:98px}.person img{height:66px}.station{font-size:25px}.cars{gap:5px}.car{padding:5px}.seat{min-height:32px}.pwa{display:none}}
+    @media(max-height:720px){.title span,.pwa{display:none}.app{padding-top:calc(8px + var(--safe-top))}.board{gap:7px;padding:10px}.sign{padding:10px 14px}.station{font-size:25px}.rule{font-size:12px}.stat{padding:8px 10px}.stat strong{font-size:24px}.trainZone,.platform{padding:8px}.person{min-height:92px}.person img{height:58px}.seat{min-height:30px}.action{padding:11px 8px}.dest{font-size:11px}}
+    @media(min-width:720px){body{position:static;overflow:auto}.app{min-height:100vh;height:auto}.phone{height:min(930px,96vh)}}
   </style>
 </head>
 <body>
   <main class="app">
     <section class="phone">
-      <header class="topbar"><div class="brand"><b>다음정류장은</b><span>한국 지하철 탑승 · 하차 퍼즐</span></div><div class="pill">🚇 PWA Prototype</div></header>
-      <section class="hud"><div class="stat"><small>레벨</small><strong id="level">1</strong></div><div class="stat"><small>남은 시간</small><strong id="time">45</strong></div><div class="stat"><small>혼잡도</small><strong id="crowd">0%</strong></div></section>
-      <section class="board">
-        <div class="station-sign"><div><div class="station-name" id="station">강남역</div><div class="station-sub">먼저 내리고, 같은 옷색 칸에 태우세요</div></div><div class="station-sub">이번 열차<br><b id="line">2호선</b></div></div>
-        <div class="play-area">
-          <div class="train-wrap"><div class="rail-label"><span>도착 열차</span><span id="targetText">승객 12명 탑승</span></div><div class="train" id="train"></div></div>
-          <div class="platform"><div class="queue-head"><span>플랫폼 대기 승객</span><span id="selectedText">옷색 = 목적지</span></div><div class="passengers" id="passengers"></div></div>
-        </div>
-        <div class="controls"><button class="action" id="hintBtn">힌트</button><button class="action primary" id="departBtn">출발</button><button class="action dark" id="resetBtn">다시</button></div>
+      <header class="top">
+        <div class="title"><b>다음정류장은</b><span>한국 지하철 탑승 · 하차 퍼즐</span></div>
+        <div class="pwa">🚇 PWA Prototype</div>
+      </header>
+      <section class="hud">
+        <div class="stat"><small>레벨</small><strong id="level">1</strong></div>
+        <div class="stat"><small>남은 시간</small><strong id="time">45</strong></div>
+        <div class="stat"><small>혼잡도</small><strong id="crowd">0%</strong></div>
       </section>
-      <div class="toast" id="toast">좋아요!</div>
-      <div class="modal" id="modal"><div class="card"><h2 id="modalTitle">정시 출발!</h2><p id="modalDesc">승객을 모두 올바르게 태웠어요.</p><div class="stars" id="stars">★★★</div><button class="action primary" id="nextBtn" style="width:100%">다음 역으로</button></div></div>
+      <section class="board">
+        <div class="sign">
+          <div><div class="station" id="station">강남역</div><div class="rule" id="rule">먼저 내리고, 빈자리에 태우세요</div></div>
+          <div class="line">이번 열차<b id="line">2호선</b></div>
+        </div>
+        <section class="trainZone">
+          <div class="zoneHead"><span>도착 열차</span><span class="phase exit" id="phase">🚪 하차 먼저</span></div>
+          <div class="cars" id="cars"></div>
+        </section>
+        <section class="platform">
+          <div class="zoneHead"><span>플랫폼 대기 승객</span><span id="queueInfo">옷색 = 목적지</span></div>
+          <div class="waiting" id="waiting"></div>
+        </section>
+        <div class="actions">
+          <button class="action" id="hintBtn">힌트</button>
+          <button class="action primary" id="departBtn">출발</button>
+          <button class="action dark" id="resetBtn">다시</button>
+        </div>
+      </section>
+      <div class="toast" id="toast"></div>
+      <div class="modal" id="modal"><div class="card"><h2 id="modalTitle">정시 출발!</h2><p id="modalDesc">승객을 모두 처리했어요.</p><div class="stars" id="stars">★★★</div><button class="action primary" id="nextBtn" style="width:100%">다음 역으로</button></div></div>
     </section>
   </main>
-<script>
-(function(){
-  function setVh(){document.documentElement.style.setProperty("--vh",`${window.innerHeight*.01}px`)}
-  setVh(); addEventListener("resize",setVh); addEventListener("orientationchange",setVh);
-  if("serviceWorker" in navigator){ addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js").catch(()=>{})); }
-
-  const colors=["red","green","blue","yellow","purple","pink"];
-  const colorNames={red:"잠실",green:"신도림",blue:"서울역",yellow:"고터",purple:"왕십리",pink:"홍대"};
-  const stations=["강남역","신도림역","홍대입구역","서울역","잠실역","고속터미널역","사당역","왕십리역"];
-  const lines=["2호선","1호선","공항철도","4호선","9호선","수인분당선"];
-  const $=id=>document.getElementById(id);
-  const asset=(gender,color)=>`./assets/passengers/passenger_${gender}_${color}.png`;
-  let state={level:Number(localStorage.getItem("nextStationLevel")||1),time:45,selectedId:null,passengers:[],cars:[],timer:null,locked:false,mistakes:0};
-
-  function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
-  function cfg(level){const carCount=Math.min(3,2+Math.floor(level/2));const activeColors=colors.slice(0,carCount);const capacity=4+Math.floor(level/4);const passengerCount=carCount*Math.min(capacity,4+Math.floor(level/3));return{activeColors,capacity,passengerCount,time:Math.max(28,47-level)}}
-  function makePassenger(id,color,type){const gender=Math.random()>.5?"female":"male";return{id,color,dest:colorNames[color],type,boarded:false,gender,img:asset(gender,color)}}
-
-  function newLevel(){
-    clearInterval(state.timer);
-    const c=cfg(state.level);
-    state.time=c.time; state.selectedId=null; state.locked=false; state.mistakes=0;
-    state.cars=c.activeColors.map((color,i)=>({id:i,color,people:[],capacity:c.capacity}));
-    state.passengers=[]; let id=1;
-    c.activeColors.forEach(color=>{const each=Math.floor(c.passengerCount/c.activeColors.length); for(let i=0;i<each;i++) state.passengers.push(makePassenger(id++,color,i===0&&state.level>2?"하차":"탑승"));});
-    shuffle(state.passengers);
-    $("station").textContent=stations[(state.level-1)%stations.length]; $("line").textContent=lines[(state.level-1)%lines.length]; $("level").textContent=state.level; $("targetText").textContent=`승객 ${state.passengers.length}명 탑승`; $("modal").classList.remove("show");
-    render(); state.timer=setInterval(()=>{if(state.locked)return; state.time--; tickHud(); if(state.time<=0) finish(false,"출발 시간이 지났어요","다시 정리해서 정시 출발을 노려보세요.")},1000);
-  }
-  function tickHud(){ $("time").textContent=Math.max(0,state.time); const total=state.cars.reduce((a,c)=>a+c.capacity,0); const boarded=state.cars.reduce((a,c)=>a+c.people.length,0); $("crowd").textContent=Math.round(boarded/total*100)+"%"; }
-  function render(){
-    $("train").innerHTML="";
-    state.cars.forEach(car=>{const el=document.createElement("button"); el.className=`car ${car.people.length>=car.capacity?"full":""}`; el.innerHTML=`<div class="car-title"><span>${colorNames[car.color]}</span><span>${car.people.length}/${car.capacity}</span></div><div class="seats">${car.people.map(p=>`<img class="mini" src="${p.img}" alt="">`).join("")}</div><div class="cap">${car.color==="green"?"순환":"일반"} 칸</div>`; el.onclick=()=>boardToCar(car.id); $("train").appendChild(el);});
-    $("passengers").innerHTML="";
-    state.passengers.forEach(p=>{const el=document.createElement("button"); el.className=`person ${p.boarded?"boarded":""} ${state.selectedId===p.id?"selected":""}`; el.innerHTML=`<span class="gender-badge">${p.gender==="female"?"♀":"♂"}</span><span class="tag">${p.type}</span><img class="person-img" src="${p.img}" alt="${p.dest}행 승객"><small>${p.dest}</small>`; el.onclick=()=>selectPassenger(p.id); $("passengers").appendChild(el);});
-    const selected=state.passengers.find(p=>p.id===state.selectedId); $("selectedText").textContent=selected?`${selected.dest}행 승객 선택됨`:"옷색 = 목적지"; tickHud();
-  }
-  function selectPassenger(id){if(state.locked)return; const p=state.passengers.find(x=>x.id===id); if(!p||p.boarded)return; state.selectedId=state.selectedId===id?null:id; render();}
-  function boardToCar(carId){
-    if(state.locked)return; const passenger=state.passengers.find(p=>p.id===state.selectedId); const car=state.cars.find(c=>c.id===carId);
-    if(!passenger)return toast("먼저 승객을 선택하세요"); if(car.people.length>=car.capacity)return toast("이 칸은 이미 만원이에요");
-    if(passenger.color!==car.color){state.mistakes++; toast("옷색이 다른 칸이에요!"); return}
-    passenger.boarded=true; car.people.push(passenger); state.selectedId=null; toast(passenger.type==="하차"?"하차 후 재탑승 완료":"탑승 완료"); render();
-    if(state.passengers.every(p=>p.boarded)) finish(true,"정시 출발!","승객을 모두 올바른 칸에 태웠어요.");
-  }
-  function finish(success,title,desc){
-    state.locked=true; clearInterval(state.timer); const boarded=state.passengers.filter(p=>p.boarded).length; const all=state.passengers.length;
-    const star=success?(state.mistakes===0&&state.time>15?3:state.mistakes<=1?2:1):Math.max(1,Math.round(boarded/all*2));
-    $("modalTitle").textContent=title; $("modalDesc").textContent=desc; $("stars").textContent="★".repeat(star)+"☆".repeat(3-star); $("nextBtn").textContent=success?"다음 역으로":"다시 도전"; $("modal").classList.add("show");
-    if(success){state.level++; localStorage.setItem("nextStationLevel",state.level)}
-  }
-  function toast(text){const t=$("toast"); t.textContent=text; t.classList.add("show"); clearTimeout(t._timer); t._timer=setTimeout(()=>t.classList.remove("show"),900)}
-  $("hintBtn").onclick=()=>{const p=state.passengers.find(x=>!x.boarded); if(!p)return; state.selectedId=p.id; const carIndex=state.cars.findIndex(c=>c.color===p.color)+1; toast(`${p.dest}행 승객은 ${carIndex}번째 칸으로!`); render()};
-  $("departBtn").onclick=()=> state.passengers.every(p=>p.boarded)?finish(true,"정시 출발!","모든 승객이 탑승했어요."):finish(false,"승객이 남았어요","플랫폼에 남은 승객을 모두 태워야 해요.");
-  $("resetBtn").onclick=()=>newLevel(); $("nextBtn").onclick=()=>newLevel(); document.addEventListener("gesturestart",e=>e.preventDefault());
-  newLevel();
-})();
-</script>
+  <script>
+    const colors=["red","green","blue","yellow","purple","pink"];
+    const colorNames={red:"잠실",green:"신도림",blue:"서울역",yellow:"고터",purple:"왕십리",pink:"홍대"};
+    const colorHex={red:"#ef4444",green:"#22c55e",blue:"#3b82f6",yellow:"#facc15",purple:"#a855f7",pink:"#ec4899"};
+    const stations=["강남역","신도림역","홍대입구역","서울역","잠실역","고속터미널역","사당역","왕십리역"];
+    const lines=["2호선","1호선","공항철도","4호선","9호선","수인분당선"];
+    const $=id=>document.getElementById(id);
+    let uid=1;
+    let state={level:Number(localStorage.getItem("nextStationLevelV5")||1),time:45,selectedId:null,platform:[],cars:[],timer:null,locked:false,mistakes:0,exited:0};
+    function setVh(){document.documentElement.style.setProperty("--vh",`${window.innerHeight*.01}px`)}
+    setVh(); addEventListener("resize",setVh); addEventListener("orientationchange",setVh);
+    function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+    function pick(a){return a[Math.floor(Math.random()*a.length)]}
+    function asset(p){return `assets/passengers/passenger_${p.gender}_${p.color}.png`}
+    function makePassenger(color, opts={}){return {id:uid++, color, gender:opts.gender||pick(["male","female"]), dest:colorNames[color], exitNow:!!opts.exitNow, boarded:false}}
+    function config(level){const carCount=Math.min(3,2+Math.floor(level/2));const active=colors.slice(0,carCount);const cap=4+Math.floor(level/5);const exitCount=Math.min(carCount,1+Math.floor(level/3));const stayCount=level<2?0:Math.min(2,Math.floor(level/4)+1);const boardEach=Math.min(cap,3+Math.floor(level/3));return {active,cap,exitCount,stayCount,boardEach,time:Math.max(30,48-level)}}
+    function newLevel(){clearInterval(state.timer);uid=1;const cfg=config(state.level);state.time=cfg.time;state.selectedId=null;state.locked=false;state.mistakes=0;state.exited=0;state.cars=cfg.active.map((color,i)=>({id:i,color,cap:cfg.cap,people:[]}));
+      let exitBudget=cfg.exitCount;
+      state.cars.forEach((car,idx)=>{
+        if(exitBudget>0){car.people.push(makePassenger(car.color,{exitNow:true}));exitBudget--}
+        for(let s=0;s<cfg.stayCount && car.people.length<car.cap-1;s++){car.people.push(makePassenger(car.color,{exitNow:false}))}
+      });
+      state.platform=[];cfg.active.forEach(color=>{const available=cfg.cap-state.cars.find(c=>c.color===color).people.length;const n=Math.max(1,Math.min(cfg.boardEach,available));for(let i=0;i<n;i++)state.platform.push(makePassenger(color))});shuffle(state.platform);
+      $("station").textContent=stations[(state.level-1)%stations.length];$("line").textContent=lines[(state.level-1)%lines.length];$("level").textContent=state.level;$("modal").classList.remove("show");tickHud();render();
+      state.timer=setInterval(()=>{if(state.locked)return;state.time--;tickHud();if(state.time<=0)finish(false,"출발 시간이 지났어요","하차와 탑승을 더 빠르게 처리해보세요.")},1000)
+    }
+    function exitRemaining(){return state.cars.reduce((n,c)=>n+c.people.filter(p=>p.exitNow).length,0)}
+    function tickHud(){const total=state.cars.reduce((a,c)=>a+c.cap,0);const occupied=state.cars.reduce((a,c)=>a+c.people.length,0);$("time").textContent=Math.max(0,state.time);$("crowd").textContent=Math.round(occupied/total*100)+"%";}
+    function render(){const exits=exitRemaining();$("phase").textContent=exits>0?`🚪 하차 ${exits}명 먼저`:`✅ 탑승 가능`;$("phase").className=`phase ${exits>0?"exit":"board"}`;$("queueInfo").textContent=state.selectedId?"칸을 선택하세요":"옷색 = 목적지";
+      const cars=$("cars");cars.innerHTML="";state.cars.forEach(car=>{const selected=state.platform.find(p=>p.id===state.selectedId);const el=document.createElement("div");el.className=`car ${selected&&selected.color===car.color&&exits===0?"canBoard":""} ${car.people.length>=car.cap?"full":""}`;let seats="";for(let i=0;i<car.cap;i++){const p=car.people[i];seats+=`<div class="seat">${p?`<button class="rider ${p.exitNow?"exitNow":""}" aria-label="${p.exitNow?'하차 승객':'탑승 승객'}" data-passenger="${p.id}"><img src="${asset(p)}" alt=""><span class="exitBadge" style="display:${p.exitNow?'block':'none'}">하차</span></button>`:`<span class="empty">빈칸</span>`}</div>`}
+        el.innerHTML=`<div class="carTop"><span class="carName">${colorNames[car.color]}</span><span>${car.people.length}/${car.cap}</span></div><div class="seatGrid">${seats}</div><div class="carFoot">${car.color==="green"?"순환":"일반"} 칸</div>`;el.addEventListener("click",e=>{if(e.target.closest(".rider"))return;boardToCar(car.id)});cars.appendChild(el)});
+      cars.querySelectorAll(".rider").forEach(btn=>btn.addEventListener("click",e=>{e.stopPropagation();deboard(Number(btn.dataset.passenger))}));
+      const waiting=$("waiting");waiting.innerHTML="";state.platform.filter(p=>!p.boarded).forEach(p=>{const b=document.createElement("button");b.className=`person ${state.selectedId===p.id?"selected":""}`;b.style.setProperty("--swatch",colorHex[p.color]);b.innerHTML=`<img src="${asset(p)}" alt=""><div class="dest">${p.dest}</div><span class="swatch"></span>`;b.addEventListener("click",()=>selectPassenger(p.id));waiting.appendChild(b)});tickHud();}
+    function deboard(id){if(state.locked)return;for(const car of state.cars){const idx=car.people.findIndex(p=>p.id===id);if(idx>=0){const p=car.people[idx];if(!p.exitNow)return toast("이번 역에서 내리는 승객이 아니에요");car.people.splice(idx,1);state.exited++;toast("하차 완료! 빈자리가 생겼어요");render();return}}}
+    function selectPassenger(id){if(state.locked)return;if(exitRemaining()>0)return toast("먼저 내릴 승객을 내려주세요");const p=state.platform.find(x=>x.id===id&&!x.boarded);if(!p)return;state.selectedId=state.selectedId===id?null:id;render();}
+    function boardToCar(carId){if(state.locked)return;if(exitRemaining()>0)return toast("먼저 내릴 승객이 있어요!");const p=state.platform.find(x=>x.id===state.selectedId&&!x.boarded);if(!p)return toast("승객을 먼저 선택하세요");const car=state.cars.find(c=>c.id===carId);if(car.people.length>=car.cap)return toast("이 칸은 만원이에요");if(p.color!==car.color){state.mistakes++;return toast("옷색과 목적지가 달라요")}
+      p.boarded=true;car.people.push(p);state.selectedId=null;toast("탑승 완료!");render();if(state.platform.every(x=>x.boarded)&&exitRemaining()===0)finish(true,"정시 출발!","하차 후 탑승까지 완벽하게 처리했어요.")}
+    function finish(success,title,desc){state.locked=true;clearInterval(state.timer);const star=success?(state.mistakes===0&&state.time>14?3:state.mistakes<=1?2:1):1;$("modalTitle").textContent=title;$("modalDesc").textContent=desc;$("stars").textContent="★".repeat(star)+"☆".repeat(3-star);$("nextBtn").textContent=success?"다음 역으로":"다시 도전";$("modal").classList.add("show");if(success){state.level++;localStorage.setItem("nextStationLevelV5",state.level)}}
+    function toast(text){const t=$("toast");t.textContent=text;t.classList.add("show");clearTimeout(t._timer);t._timer=setTimeout(()=>t.classList.remove("show"),900)}
+    $("hintBtn").addEventListener("click",()=>{const exits=exitRemaining();if(exits>0){toast("노란 ‘하차’ 승객을 먼저 눌러주세요");return}const p=state.platform.find(x=>!x.boarded);if(!p)return;state.selectedId=p.id;toast(`${p.dest}행 승객을 ${p.dest} 칸에 태우세요`);render()});
+    $("departBtn").addEventListener("click",()=>{if(exitRemaining()>0)return toast("하차 승객이 남았어요");if(!state.platform.every(p=>p.boarded))return toast("플랫폼 승객이 남았어요");finish(true,"정시 출발!","모든 승객을 처리했어요.")});
+    $("resetBtn").addEventListener("click",newLevel);$("nextBtn").addEventListener("click",newLevel);document.addEventListener("gesturestart",e=>e.preventDefault());
+    if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("service-worker.js").catch(()=>{}))}
+    newLevel();
+  </script>
 </body>
 </html>
