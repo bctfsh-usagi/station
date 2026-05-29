@@ -135,7 +135,8 @@ body{
 .pill .ken{font-family:'Gowun Dodum';font-size:8px;color:#9aa6b2;line-height:1.1;}
 
 /* 안내문구 */
-.hint{margin:0 12px 4px;text-align:center;font-family:'Gaegu';font-size:14px;color:#456;min-height:20px;transition:.2s;}
+.hint{margin:8px auto 6px;max-width:90%;text-align:center;font-family:'Jua';font-size:13px;color:#fff;line-height:1.35;
+  background:rgba(18,26,36,.82);padding:7px 15px;border-radius:15px;box-shadow:0 3px 8px rgba(0,0,0,.28);transition:.2s;}
 .hint b{color:#e8590c;}
 .hint .en{color:#8a97a3;font-size:11px;}
 
@@ -149,9 +150,10 @@ body{
 .docks{display:flex;flex-direction:column;gap:9px;}
 .dock{position:relative;height:74px;}
 .dock-empty{
-  position:absolute;inset:0;border:2px dashed #b6c0cf;border-radius:14px;
-  display:flex;align-items:center;justify-content:center;color:#9aa6b6;
-  font-family:'Gaegu';font-size:13px;background:rgba(255,255,255,.25);
+  position:absolute;inset:0;border-radius:16px;
+  display:flex;align-items:center;justify-content:center;color:#fff;
+  font-family:'Jua';font-size:14px;background:rgba(18,26,36,.55);
+  border:2px dashed rgba(255,255,255,.5);text-shadow:0 1px 3px rgba(0,0,0,.55);
 }
 
 /* 열차 카드 */
@@ -241,7 +243,9 @@ body{
 .train .btns .go{border:none;cursor:pointer;font-family:'Jua';font-size:13px;line-height:1;color:#3a4a5e;
   background:linear-gradient(180deg,#fff,#e9edf1);border-radius:11px;padding:9px 11px;
   box-shadow:0 3px 0 rgba(0,0,0,.12),inset 0 0 0 1px rgba(0,0,0,.05);}
-.train .btns .go.alight{color:#fff;background:linear-gradient(180deg,#ff8585,#e84545);box-shadow:0 3px 0 rgba(170,30,30,.4);}
+.train .btns .go.alight{color:#fff;background:linear-gradient(180deg,#ff8585,#e84545);box-shadow:0 3px 0 rgba(170,30,30,.4);display:inline-flex;align-items:center;gap:4px;}
+.train .btns .go.alight .bic{width:15px;height:15px;}
+.train .wait .wic{width:12px;height:12px;opacity:.92;}
 .train .btns .go:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(0,0,0,.12);}
 .train .timer{display:inline-flex;align-items:center;gap:5px;align-self:flex-start;
   background:rgba(0,0,0,.24);padding:2px 9px;border-radius:10px;font-family:'Jua';font-size:12px;color:#fff;}
@@ -268,10 +272,10 @@ body{
 .floor-label{position:absolute;top:10px;right:12px;font-family:'Jua';font-size:12px;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.5);
   display:flex;flex-direction:column;align-items:flex-end;line-height:1;text-align:right;}
 .floor-label span{font-family:'Gowun Dodum';font-size:8px;color:#e8edf2;margin-top:1px;}
-.lanes{display:flex;justify-content:center;gap:7px;height:100%;align-items:flex-start;padding-top:10px;}
-.lane{display:flex;flex-direction:column;align-items:center;gap:3px;width:52px;}
+.lanes{display:flex;justify-content:center;gap:10px;height:100%;align-items:flex-start;padding-top:16px;}
+.lane{display:flex;flex-direction:column;align-items:center;gap:6px;width:64px;}
 .person{
-  position:relative;width:46px;height:62px;cursor:pointer;transition:transform .2s;
+  position:relative;width:58px;height:80px;cursor:pointer;transition:transform .2s;
 }
 .psprite{width:auto;height:100%;display:block;margin:0 auto;pointer-events:none;-webkit-user-drag:none;filter:drop-shadow(0 2px 1px rgba(0,0,0,.18));}
 .pbadge{position:absolute;font-family:'Jua';width:19px;height:19px;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(0,0,0,.35);z-index:3;}
@@ -311,9 +315,11 @@ body{
 .stars{font-size:34px;letter-spacing:4px;margin:8px 0;}
 .howrow{display:flex;align-items:center;gap:10px;text-align:left;margin:9px 0;font-family:'Gowun Dodum';font-size:14px;color:#445;}
 .howrow .ic{font-size:24px;flex:0 0 30px;text-align:center;}
-.toast{position:absolute;left:50%;top:46%;transform:translate(-50%,-50%) scale(.5);font-family:'Jua';font-size:34px;color:#fff;text-shadow:0 3px 10px rgba(0,0,0,.4);opacity:0;z-index:90;pointer-events:none;}
-.toast.show{animation:toast .9s forwards;}
-@keyframes toast{15%{opacity:1;transform:translate(-50%,-50%) scale(1.1)}80%{opacity:1;transform:translate(-50%,-60%) scale(1)}100%{opacity:0;transform:translate(-50%,-75%) scale(1)}}
+.toast{position:absolute;left:50%;bottom:calc(74px + env(safe-area-inset-bottom,0px));transform:translateX(-50%) translateY(18px);
+  font-family:'Jua';font-size:15px;color:#fff;background:rgba(18,26,36,.93);padding:10px 20px;border-radius:20px;
+  box-shadow:0 6px 18px rgba(0,0,0,.4);opacity:0;z-index:90;pointer-events:none;white-space:nowrap;max-width:88%;}
+.toast.show{animation:toast 1.9s cubic-bezier(.2,.8,.2,1) forwards;}
+@keyframes toast{0%{opacity:0;transform:translateX(-50%) translateY(18px)}12%{opacity:1;transform:translateX(-50%) translateY(0)}85%{opacity:1;transform:translateX(-50%) translateY(0)}100%{opacity:0;transform:translateX(-50%) translateY(-8px)}}
 .sound-toggle{position:absolute;bottom:calc(14px + env(safe-area-inset-bottom,0px));left:14px;z-index:80;background:rgba(255,255,255,.85);border:none;width:38px;height:38px;border-radius:50%;font-size:17px;cursor:pointer;box-shadow:0 3px 7px rgba(0,0,0,.2);}
 </style>
 </head>
@@ -617,9 +623,9 @@ function trainEl(tr,di){
   const sec=Math.ceil(tr.time);
   const info = active
     ? `<div class="timer${tr.time<=5?' urgent':''}">곧 출발 <span class="cd">0:${String(sec).padStart(2,'0')}</span></div>`
-    : `<div class="wait">🚦 앞차 먼저</div>`;
+    : `<div class="wait"><svg class="wic" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1.5"/><rect x="14" y="5" width="4" height="14" rx="1.5"/></svg>앞차 먼저</div>`;
   const btns = active
-    ? `<div class="btns">${tr.locked?'<button class="go alight">내려요</button>':''}<button class="go depart">출발</button></div>`
+    ? `<div class="btns">${tr.locked?'<button class="go alight"><svg class="bic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v10"/><path d="M7 9l5 5 5-5"/><path d="M5 20h14"/></svg>내려요</button>':''}<button class="go depart">출발</button></div>`
     : '';
   el.innerHTML=`
     <div class="tab">
@@ -676,8 +682,8 @@ function startLevel(idx){
 }
 function updateHint(){
   const lockedAny=G.docks.some(t=>t&&t.locked);
-  if(lockedAny){ setHint('🚪 <b>내리는 분 먼저!</b> 빨간 「내려요」를 눌러 주세요<span class="en"> · Let passengers off first</span>'); }
-  else { setHint('👆 같은 색·종류 열차에 맞는 승객을 태워주세요<span class="en"> · Board the matching train</span>'); }
+  if(lockedAny){ setHint('🚪 <b>내리는 분이 있어요!</b> 먼저 내리게 한 뒤 태워주세요'); }
+  else { setHint('👆 같은 <b>색·종류</b> 열차에 맞는 승객을 태워주세요'); }
 }
 
 /* ---------- 입력 처리 ---------- */
@@ -685,7 +691,7 @@ $('#docks').addEventListener('click',e=>{
   if(busy)return;
   const trainDiv=e.target.closest('.train'); if(!trainDiv)return;
   const di=+trainDiv.dataset.train; const tr=G.docks[di]; if(!tr)return;
-  if(!isActive(di)){ toast('앞차 먼저 출발해요 🚦'); return; }
+  if(!isActive(di)){ toast('앞차를 먼저 출발시켜 주세요'); return; }
   if(e.target.closest('.alight')){ doAlight(di); return; }
   if(e.target.closest('.depart')){ departTrain(di,true); return; }
 });
@@ -721,7 +727,7 @@ function tryBoard(li,pd){
     const lockedMatch=G.docks.some(t=>t&&t.locked&&(t.line===p.line||t.line===p.transfer));
     const waitMatch=G.docks.some((t,j)=>t&&!isActive(j)&&(t.line===p.line||t.line===p.transfer));
     if(lockedMatch) toast('내리는 분 먼저! 🚪');
-    else if(waitMatch) toast('앞차 먼저 출발해요 🚦');
+    else if(waitMatch) toast('앞차를 먼저 출발시켜 주세요');
     else toast('맞는 열차가 없어요 🥲');
     wiggle(pd);
     return;
@@ -797,7 +803,7 @@ function doAlight(di){
 /* 열차 출발 */
 function departTrain(di,manual,forced){
   const tr=G.docks[di]; if(!tr)return;
-  if(!forced && !isActive(di)){ toast('앞차 먼저 출발해요 🚦'); return; }
+  if(!forced && !isActive(di)){ toast('앞차를 먼저 출발시켜 주세요'); return; }
   if(!forced && tr.locked){ toast('내리는 분 먼저! 🚪'); return; }
   busy=true; sDepart();
   const trainDiv=document.querySelector('.train[data-train="'+di+'"]');
