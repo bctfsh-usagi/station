@@ -609,34 +609,67 @@ function checkOver(){
 function buildLevel(idx){
   const L=LEVELS[Math.min(idx,LEVELS.length-1)];
   const idxLines=L.lines.map(no=>LINES.findIndex(x=>x.no===no)).filter(i=>i>=0);
-  const passengers=[];
-  for(let i=0;i<L.count;i++){
-    let line=pick(idxLines);
-    let express=L.express? Math.random()<0.35 : false;
-    let transfer=null;
-    if(L.transfer && Math.random()<0.22 && idxLines.length>1){
-      express=false;
-      do{ transfer=pick(idxLines); }while(transfer===line);
+  function gen(extra){
+    const passengers=[];
+    for(let i=0;i<L.count;i++){
+      let line=pick(idxLines);
+      let express=L.express? Math.random()<0.30 : false;
+      let transfer=null;
+      if(L.transfer && Math.random()<0.18 && idxLines.length>1){
+        express=false;
+        do{ transfer=pick(idxLines); }while(transfer===line);
+      }
+      passengers.push({line,express,transfer,gender:Math.random()<0.5?'m':'f',_uid:_uid++});
     }
-    passengers.push({line,express,transfer,gender:Math.random()<0.5?'m':'f',_uid:_uid++});
+    const lanes=Array.from({length:L.lanes},()=>[]);
+    passengers.forEach((p,i)=>lanes[i%L.lanes].push(p));
+    lanes.forEach(l=>l.sort(()=>Math.random()-0.5));
+    const demand={};
+    passengers.forEach(p=>{ const k=p.line+'_'+(p.express?1:0); demand[k]=(demand[k]||0)+1; });
+    const trains=[];
+    Object.keys(demand).forEach(key=>{
+      const [ln,ex]=key.split('_').map(Number);
+      const target=demand[key]+L.cap[1]*(1+extra);
+      let sum=0;
+      while(sum<target){ const cap=rnd(L.cap[0],L.cap[1]); trains.push(makeTrain(ln,!!ex,cap,L)); sum+=cap; }
+    });
+    shuffle(trains);
+    return {passengers,lanes,trains};
   }
-  const lanes=Array.from({length:L.lanes},()=>[]);
-  passengers.forEach((p,i)=>lanes[i%L.lanes].push(p));
-  lanes.forEach(l=>l.sort(()=>Math.random()-0.5));
-  // 카테고리별 수요(환승은 주 노선 로컬에 집계)
-  const demand={};
-  passengers.forEach(p=>{ const k=p.line+'_'+(p.express?1:0); demand[k]=(demand[k]||0)+1; });
-  // 카테고리별로 좌석이 수요+버퍼를 덮을 때까지 열차 생성 (항상 풀이 가능)
-  const trains=[];
-  Object.keys(demand).forEach(key=>{
-    const [ln,ex]=key.split('_').map(Number);
-    const target=demand[key]+L.cap[1];
-    let sum=0;
-    while(sum<target){ const cap=rnd(L.cap[0],L.cap[1]); trains.push(makeTrain(ln,!!ex,cap,L)); sum+=cap; }
-  });
-  shuffle(trains);
-  G={ L, lanes, queue:trains, docks:[null,null,null],
-      remaining:passengers.length, total:passengers.length,
+  // 풀이 가능 검사용 솔버(타이머 무시, 게임과 동일 규칙)
+  function solvable(lanes,trains){
+    const L2=lanes.map(l=>l.map(p=>({line:p.line,express:p.express,transfer:p.transfer})));
+    const Q=trains.map(t=>({line:t.line,express:t.express,empty:t.capacity}));
+    const docks=[null,null,null];
+    let remaining=L2.reduce((s,l)=>s+l.length,0);
+    const act=di=>{const tr=docks[di];if(!tr)return false;for(let j=0;j<di;j++){const o=docks[j];if(o&&o.line===tr.line)return false;}return true;};
+    const mt=(p,tr)=>p.transfer!=null?((tr.line===p.line||tr.line===p.transfer)&&!tr.express):(tr.line===p.line&&tr.express===p.express);
+    let g=0;
+    while(g++<4000){
+      for(let i=0;i<3;i++){ if(!docks[i]&&Q.length) docks[i]=Q.shift(); }
+      let did=true;
+      while(did){ did=false;
+        for(let li=0;li<L2.length;li++){ const p=L2[li][0]; if(!p)continue;
+          for(let di=0;di<3;di++){ const tr=docks[di]; if(!tr||!act(di)||tr.empty<=0)continue;
+            if(mt(p,tr)){ tr.empty--; L2[li].shift(); remaining--; did=true; break; } } } }
+      if(remaining<=0)return true;
+      const rem={};
+      L2.forEach(l=>l.forEach(p=>{ const ks=p.transfer!=null?[p.line+'_0',p.transfer+'_0']:[p.line+'_'+(p.express?1:0)]; ks.forEach(k=>rem[k]=(rem[k]||0)+1); }));
+      let best=-1,bu=1e9;
+      for(let di=0;di<3;di++){ if(!act(di)||!docks[di])continue; const tr=docks[di];
+        if(tr.empty<=0){best=di;break;}
+        const u=rem[tr.line+'_'+(tr.express?1:0)]||0; if(u<bu){bu=u;best=di;} }
+      if(best<0)for(let di=0;di<3;di++){ if(act(di)&&docks[di]){best=di;break;} }
+      if(best<0)return false;
+      if(Q.length)docks[best]=Q.shift();else docks[best]=null;
+      if(docks.every(d=>!d)&&!Q.length&&remaining>0)return false;
+    }
+    return remaining<=0;
+  }
+  let inst=null;
+  for(let a=0;a<160;a++){ const extra=Math.floor(a/25); const cand=gen(extra); inst=cand; if(solvable(cand.lanes,cand.trains)) break; }
+  G={ L, lanes:inst.lanes, queue:inst.trains, docks:[null,null,null],
+      remaining:inst.passengers.length, total:inst.passengers.length,
       mistakes:0, wasted:0, station:L.station, over:false, continues:0 };
 }
 
