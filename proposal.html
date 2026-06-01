@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>다음 정거장은.. · 게임 제안서</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&family=Black+Han+Sans&display=swap" rel="stylesheet">
+<style>
+:root{
+  --l1:#0052A4; --l2:#00A84D; --l3:#EF7C1C; --l4:#00A5DE; --l5:#996CAC; --l8:#E6186C;
+  --ink:#16222e; --ink2:#46586c; --mute:#8194a6;
+  --paper:#eef2f6; --card:#ffffff; --line:#0052A4;
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0; background:var(--paper); color:var(--ink);
+  font-family:'Gowun Dodum',sans-serif; line-height:1.7;
+  background-image:
+    radial-gradient(circle at 12% 8%, rgba(0,168,77,.06), transparent 38%),
+    radial-gradient(circle at 88% 22%, rgba(239,124,28,.06), transparent 40%),
+    radial-gradient(circle at 78% 88%, rgba(0,82,164,.06), transparent 42%);
+}
+/* 미세 그레인 */
+body::before{
+  content:""; position:fixed; inset:0; pointer-events:none; z-index:0; opacity:.04;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.wrap{position:relative; z-index:1; max-width:880px; margin:0 auto; padding:0 22px 90px;}
+
+/* ===== 상단 역명판 히어로 ===== */
+.hero{padding:64px 0 30px; text-align:center;}
+.roundel{
+  width:74px; height:74px; border-radius:50%; margin:0 auto 18px;
+  background:var(--l2); display:flex; align-items:center; justify-content:center;
+  box-shadow:0 10px 26px rgba(0,168,77,.35), inset 0 0 0 5px #fff;
+  animation:pop .7s cubic-bezier(.2,.9,.2,1.2) both;
+}
+.roundel svg{width:46px; height:46px;}
+.plate{
+  display:inline-block; background:#fff; border-radius:18px; padding:16px 30px 14px;
+  box-shadow:0 14px 34px rgba(20,34,46,.12); position:relative; border:1px solid #e4eaf0;
+}
+.plate:before{content:""; position:absolute; left:0; right:0; top:0; height:7px; border-radius:18px 18px 0 0;
+  background:linear-gradient(90deg,var(--l1),var(--l2),var(--l3),var(--l4),var(--l5),var(--l8));}
+.plate .ko{font-family:'Jua'; font-size:clamp(30px,7vw,46px); color:var(--ink); letter-spacing:-.5px; margin-top:6px;}
+.plate .en{font-size:13px; color:var(--mute); letter-spacing:3px; text-transform:uppercase; margin-top:2px;}
+.tagline{margin:26px auto 0; max-width:560px; font-size:clamp(15px,2.6vw,18px); color:var(--ink2);}
+.tagline b{color:var(--ink); font-family:'Jua'; font-weight:normal;}
+.meta-row{display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-top:24px;}
+.tag{font-family:'Jua'; font-size:12.5px; color:#fff; padding:5px 13px; border-radius:20px;
+  box-shadow:0 4px 10px rgba(0,0,0,.12);}
+
+/* ===== 노선형 본문 ===== */
+.line{position:relative; padding-left:54px;}
+.line:before{content:""; position:absolute; left:21px; top:8px; bottom:60px; width:5px;
+  background:linear-gradient(180deg,var(--l2),var(--l3),var(--l5),var(--l1)); border-radius:3px;}
+.stop{position:relative; margin:0 0 26px;}
+.stop .node{position:absolute; left:-44px; top:4px; width:30px; height:30px; border-radius:50%;
+  background:#fff; border:5px solid var(--nc,var(--l2)); display:flex; align-items:center; justify-content:center;
+  font-family:'Jua'; font-size:12px; color:var(--nc,var(--l2)); box-shadow:0 4px 12px rgba(20,34,46,.12); z-index:2;}
+.card{background:var(--card); border-radius:18px; padding:24px 26px; border:1px solid #e6ecf2;
+  box-shadow:0 10px 30px rgba(20,34,46,.06);}
+.card h2{font-family:'Jua'; font-size:23px; margin:0 0 4px; color:var(--ink); letter-spacing:-.3px;}
+.card .sub{font-size:12px; color:var(--mute); letter-spacing:2px; text-transform:uppercase; margin-bottom:14px;}
+.card p{margin:0 0 12px; color:var(--ink2); font-size:15.5px;}
+.card p:last-child{margin-bottom:0;}
+.card strong{color:var(--ink); font-weight:normal; font-family:'Jua'; letter-spacing:-.2px;}
+.hl{background:linear-gradient(180deg,transparent 58%, #ffe89a 58%); padding:0 2px;}
+
+/* 카드 안 리스트 */
+.feat{display:grid; gap:12px; margin:6px 0 0;}
+.feat .it{display:flex; gap:12px; align-items:flex-start;}
+.feat .ic{flex:0 0 34px; height:34px; border-radius:10px; display:flex; align-items:center; justify-content:center;
+  background:#f1f5f9; }
+.feat .ic svg{width:19px; height:19px;}
+.feat .tx b{font-family:'Jua'; font-weight:normal; color:var(--ink); display:block; font-size:15px;}
+.feat .tx span{font-size:14px; color:var(--ink2);}
+
+/* 노선 칩(스테이지 흐름) */
+.lineflow{display:flex; flex-wrap:wrap; gap:7px; margin-top:6px;}
+.chip{display:flex; align-items:center; gap:6px; background:#f5f8fb; border:1px solid #e6ecf2;
+  border-radius:20px; padding:5px 11px 5px 6px; font-size:13px; color:var(--ink2);}
+.dot{width:18px; height:18px; border-radius:50%; color:#fff; font-family:'Jua'; font-size:10px;
+  display:flex; align-items:center; justify-content:center;}
+
+/* 차별점 강조 박스 */
+.diff{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:4px;}
+.diff .d{background:#fbfdff; border:1px dashed #cdd9e4; border-radius:14px; padding:16px 16px;}
+.diff .d .k{font-family:'Jua'; font-size:15.5px; color:var(--ink); margin-bottom:5px;}
+.diff .d .v{font-size:13.5px; color:var(--ink2);}
+@media(max-width:560px){ .diff{grid-template-columns:1fr;} }
+
+/* 로드맵 타임라인 */
+.road{display:grid; gap:10px;}
+.road .r{display:flex; gap:12px; align-items:flex-start;}
+.road .ph{flex:0 0 64px; font-family:'Jua'; font-size:12px; color:#fff; text-align:center;
+  padding:4px 0; border-radius:8px;}
+.road .rt b{font-family:'Jua'; font-weight:normal; color:var(--ink);}
+.road .rt span{display:block; font-size:13.5px; color:var(--ink2);}
+
+/* 통계 스트립 */
+.stats{display:flex; gap:10px; flex-wrap:wrap; margin-top:8px;}
+.stat{flex:1 1 120px; background:#fff; border:1px solid #e6ecf2; border-radius:14px; padding:14px 12px; text-align:center;}
+.stat .n{font-family:'Black Han Sans'; font-size:30px; color:var(--ink); line-height:1;}
+.stat .l{font-size:12.5px; color:var(--mute); margin-top:5px;}
+
+/* 종착역 CTA */
+.last{text-align:center; padding:18px 24px 30px;}
+.last .ko{font-family:'Jua'; font-size:26px; color:var(--ink);}
+.last .en{font-size:12px; letter-spacing:3px; color:var(--mute); text-transform:uppercase;}
+.foot{text-align:center; color:var(--mute); font-size:12.5px; margin-top:30px;}
+
+/* 등장 애니메이션 */
+.reveal{opacity:0; transform:translateY(18px); transition:opacity .6s ease, transform .6s cubic-bezier(.2,.8,.2,1);}
+.reveal.in{opacity:1; transform:none;}
+@keyframes pop{from{transform:scale(.4); opacity:0;} to{transform:scale(1); opacity:1;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- 히어로 -->
+  <header class="hero">
+    <div class="roundel">
+      <svg viewBox="0 0 64 64"><rect x="14" y="16" width="36" height="30" rx="9" fill="#fff"/>
+      <rect x="20" y="22" width="24" height="12" rx="4" fill="#bfe3ff"/>
+      <line x1="32" y1="22" x2="32" y2="34" stroke="#00A84D" stroke-width="2.5"/>
+      <circle cx="24" cy="40" r="2.6" fill="#2c3e50"/><circle cx="40" cy="40" r="2.6" fill="#2c3e50"/>
+      <path d="M27 43q5 4 10 0" stroke="#2c3e50" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+    </div>
+    <div class="plate">
+      <div class="en">Next Station</div>
+      <div class="ko">다음 정거장은..</div>
+      <div class="en" style="letter-spacing:2px">서울 지하철 컬러 분류 퍼즐</div>
+    </div>
+    <p class="tagline">출근길의 그 풍경을 퍼즐로. <b>줄 선 승객을 색·종류에 맞는 열차에 태워</b> 모두를 정시에 보내는,
+      한 손으로 즐기는 모바일 정차 퍼즐입니다.</p>
+    <div class="meta-row">
+      <span class="tag" style="background:var(--l2)">캐주얼 퍼즐</span>
+      <span class="tag" style="background:var(--l3)">모바일 세로</span>
+      <span class="tag" style="background:var(--l1)">설치 불필요</span>
+      <span class="tag" style="background:var(--l5)">IP: 서울 지하철</span>
+    </div>
+  </header>
+
+  <!-- 통계 -->
+  <div class="stats reveal">
+    <div class="stat"><div class="n">18</div><div class="l">실제 서울 지하철역</div></div>
+    <div class="stat"><div class="n">6</div><div class="l">노선 컬러</div></div>
+    <div class="stat"><div class="n">100%</div><div class="l">클리어 가능 보장</div></div>
+    <div class="stat"><div class="n">1</div><div class="l">파일로 완결</div></div>
+  </div>
+
+  <main class="line" style="margin-top:34px;">
+
+    <!-- 01 -->
+    <section class="stop reveal" style="--nc:var(--l2)">
+      <div class="node">01</div>
+      <div class="card">
+        <div class="sub">Concept · 한 줄 요약</div>
+        <h2>“정차 완료!”의 쾌감</h2>
+        <p>플랫폼에 줄을 선 승객들, 차례로 들어오는 열차. 플레이어는 <strong>각 승객을 맞는 열차에 태워</strong>
+          승강장을 비워냅니다. 색을 맞추는 직관적인 분류 퍼즐(Bus Escape 계열)에,
+          누구나 아는 <span class="hl">지하철이라는 일상 경험</span>을 입혔습니다.</p>
+        <p>규칙은 5초면 이해하지만, 줄 순서·발차 타이밍·환승을 읽는 한 수는 깊습니다.</p>
+      </div>
+    </section>
+
+    <!-- 02 -->
+    <section class="stop reveal" style="--nc:var(--l3)">
+      <div class="node">02</div>
+      <div class="card">
+        <div class="sub">Core Loop · 플레이</div>
+        <h2>색을 맞추고, 흐름을 읽다</h2>
+        <div class="feat">
+          <div class="it"><div class="ic"><svg viewBox="0 0 24 24"><circle cx="7" cy="9" r="4" fill="#00A84D"/><circle cx="16" cy="9" r="4" fill="#EF7C1C"/><circle cx="11.5" cy="16" r="4" fill="#00A5DE"/></svg></div>
+            <div class="tx"><b>노선 색 + 종류 매칭</b><span>승객을 같은 색·같은 종류(일반/급행)의 열차에 태웁니다.</span></div></div>
+          <div class="it"><div class="ic"><svg viewBox="0 0 24 24" fill="#f0a020"><path d="M13 2L4 14h6l-1 8 9-12h-6z"/></svg></div>
+            <div class="tx"><b>급행과 일반</b><span>겉보기엔 같은 노선이라도 종류가 다르면 못 탑니다. 한 번 더 생각하게.</span></div></div>
+          <div class="it"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#5a6b7d" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.4-5.7"/><path d="M20 3.5V8h-4.5"/></svg></div>
+            <div class="tx"><b>환승 승객</b><span>두 색을 가진 승객은 둘 중 어느 노선에든 탈 수 있어, 숨통을 틔워줍니다.</span></div></div>
+          <div class="it"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#e84545" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v10"/><path d="M7 9l5 5 5-5"/><path d="M5 20h14"/></svg></div>
+            <div class="tx"><b>내리는 분 먼저</b><span>하차 승객이 있는 열차는 먼저 내리게 한 뒤에 태울 수 있습니다.</span></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 03 -->
+    <section class="stop reveal" style="--nc:var(--l1)">
+      <div class="node">03</div>
+      <div class="card">
+        <div class="sub">Difficulty · 학습 곡선</div>
+        <h2>역을 거치며 자연스럽게 배운다</h2>
+        <p>튜토리얼 텍스트 없이, <strong>역을 지날 때마다 새 개념이 하나씩</strong> 등장합니다.</p>
+        <div class="lineflow">
+          <span class="chip"><span class="dot" style="background:var(--l2)">2</span> 1·단일 노선</span>
+          <span class="chip"><span class="dot" style="background:var(--l1)">1</span> 2·두 노선</span>
+          <span class="chip"><span class="dot" style="background:var(--l3)">3</span> 3·급행</span>
+          <span class="chip"><span class="dot" style="background:var(--l4)">4</span> 환승</span>
+          <span class="chip"><span class="dot" style="background:var(--l8)">8</span> 8호선</span>
+          <span class="chip"><span class="dot" style="background:var(--l5)">5</span> 3노선 러시아워</span>
+        </div>
+        <p style="margin-top:14px">을지로입구에서 시작해 시청·충무로·교대를 지나 <strong>강남·종로3가</strong>까지.
+          승객은 늘고 제한시간은 줄며, 마지막 역은 진짜 러시아워처럼 몰아칩니다.</p>
+      </div>
+    </section>
+
+    <!-- 04 차별점 -->
+    <section class="stop reveal" style="--nc:var(--l5)">
+      <div class="node">04</div>
+      <div class="card">
+        <div class="sub">Differentiation · 우리만의 것</div>
+        <h2>왜 이 게임이 다른가</h2>
+        <div class="diff">
+          <div class="d"><div class="k">🚇 서울 지하철이라는 IP</div><div class="v">추상적 색깔 게임이 아니라, 실제 역·실제 노선 색을 쓴 <b>로컬 감성</b>. 한국 유저에게 즉각 와닿고, 역 추가로 확장이 무한합니다.</div></div>
+          <div class="d"><div class="k">⚖️ 공정함을 보장하는 퍼즐</div><div class="v">출제되는 모든 판은 생성 시 <b>실제 규칙으로 풀이 가능 여부를 자동 검증</b>합니다. ‘운 나쁘게 못 깨는 판’이 없고, 실력으로 풀리는 재미는 그대로.</div></div>
+          <div class="d"><div class="k">🎨 손그림 감성 캐릭터</div><div class="v">노선 색 옷을 입은 승객, 좌석에 앉으면 보이는 표정. AI 티 없는 <b>따뜻한 일러스트 톤</b>으로 통일했습니다.</div></div>
+          <div class="d"><div class="k">📱 설치 없는 즉시 플레이</div><div class="v">단일 HTML로 완결되어 <b>링크 한 줄·홈 화면 추가</b>만으로 실행. 오프라인에서도 작동합니다.</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 05 편의 기능 -->
+    <section class="stop reveal" style="--nc:var(--l3)">
+      <div class="node">05</div>
+      <div class="card">
+        <div class="sub">Quality of Life · 완성도</div>
+        <h2>작은 배려가 만든 손맛</h2>
+        <div class="feat">
+          <div class="it"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#0052A4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M4 12h10M4 17h7"/></svg></div>
+            <div class="tx"><b>다음 열차 미리보기</b><span>대기 중인 열차를 노선 색으로 살짝 보여줘 전략을 세우게 합니다.</span></div></div>
+          <div class="it"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#00A84D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-11"/></svg></div>
+            <div class="tx"><b>진행 자동 저장</b><span>껐다 켜도 마지막 역에서 이어서. 스테이지별 최고 별점도 기록됩니다.</span></div></div>
+          <div class="it"><div class="ic"><svg viewBox="0 0 24 24"><rect x="4" y="6" width="16" height="11" rx="2" fill="none" stroke="#996CAC" stroke-width="2"/><path d="M11 9l4 2.5-4 2.5z" fill="#996CAC"/></svg></div>
+            <div class="tx"><b>광고 보고 이어하기</b><span>실패해도 광고(현재 더미)로 열차를 추가 투입. 스테이지당 3회까지.</span></div></div>
+          <div class="it"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#EF7C1C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg></div>
+            <div class="tx"><b>발차 타이머 & 강제 출발</b><span>열차마다 카운트다운. 늦으면 빈자리째 떠나며 긴장감을 만듭니다.</span></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 06 비즈니스 -->
+    <section class="stop reveal" style="--nc:var(--l8)">
+      <div class="node">06</div>
+      <div class="card">
+        <div class="sub">Business · 수익 & 확장</div>
+        <h2>가볍게 시작해 크게 키운다</h2>
+        <p><strong>리워드 광고 슬롯</strong>이 이미 게임에 자리 잡혀 있습니다(현재는 더미). ‘이어하기’ 흐름에
+          자연스럽게 녹아 있어, 실제 광고 SDK 연결만으로 수익화가 가능합니다.</p>
+        <p>콘텐츠 확장은 <span class="hl">역 추가</span>가 곧 레벨 추가입니다. 6·7·9호선 색을 더하면
+          강남구청·고속터미널 같은 명소 역과 시즌 한정 역, 일일 챌린지로 넓힐 수 있습니다.</p>
+      </div>
+    </section>
+
+    <!-- 07 로드맵 -->
+    <section class="stop reveal" style="--nc:var(--l4)">
+      <div class="node">07</div>
+      <div class="card">
+        <div class="sub">Roadmap · 다음 정거장</div>
+        <h2>출시까지의 노선도</h2>
+        <div class="road">
+          <div class="r"><div class="ph" style="background:var(--l2)">NOW</div><div class="rt"><b>플레이 가능한 빌드</b><span>18스테이지·핵심 루프·진행 저장·더미 광고까지 완성. 공유 가능 상태.</span></div></div>
+          <div class="r"><div class="ph" style="background:var(--l3)">NEXT</div><div class="rt"><b>웹 호스팅 배포</b><span>Vercel에 올려 https 주소 확보 → 홈 화면 아이콘·공유 링크 정식 동작.</span></div></div>
+          <div class="r"><div class="ph" style="background:var(--l1)">THEN</div><div class="rt"><b>계정 & 동기화</b><span>구글 로그인 + 클라우드 저장으로 기기 간 진행 동기화.</span></div></div>
+          <div class="r"><div class="ph" style="background:var(--l5)">GROW</div><div class="rt"><b>콘텐츠 · 수익화</b><span>역/노선 확장, 일일 챌린지, 리워드 광고 연결, 랭킹.</span></div></div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- 종착역 -->
+  <section class="last reveal">
+    <div class="roundel" style="background:var(--l1); box-shadow:0 10px 26px rgba(0,82,164,.3), inset 0 0 0 5px #fff; margin-bottom:14px">
+      <svg viewBox="0 0 64 64"><path d="M20 18h24v22a8 8 0 0 1-8 8H28a8 8 0 0 1-8-8z" fill="#fff"/>
+      <rect x="25" y="24" width="14" height="9" rx="2.5" fill="#bfe3ff"/>
+      <circle cx="26" cy="40" r="2.4" fill="#2c3e50"/><circle cx="38" cy="40" r="2.4" fill="#2c3e50"/></svg>
+    </div>
+    <div class="en">Terminal</div>
+    <div class="ko">이번 역은, 종착역입니다.</div>
+    <p style="max-width:520px; margin:12px auto 0; color:var(--ink2)">한 손으로 즐기는 작고 단단한 퍼즐.
+      지금 바로 플레이해보고, 다음 정거장을 함께 그려요.</p>
+  </section>
+
+  <div class="foot">다음 정거장은.. · 게임 제안서 · Next Station</div>
+</div>
+
+<script>
+const io=new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}})},{threshold:.12});
+document.querySelectorAll('.reveal').forEach((el,i)=>{el.style.transitionDelay=(Math.min(i,6)*60)+'ms'; io.observe(el);});
+</script>
+</body>
+</html>
