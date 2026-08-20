@@ -324,8 +324,11 @@ body{
 .howrow .ic svg{width:24px;height:24px;vertical-align:middle;}
 .toast{position:absolute;left:50%;bottom:calc(74px + env(safe-area-inset-bottom,0px));transform:translateX(-50%) translateY(18px);
   font-family:'Jua';font-size:15px;color:#fff;background:rgba(18,26,36,.93);padding:10px 20px;border-radius:20px;
-  box-shadow:0 6px 18px rgba(0,0,0,.4);opacity:0;z-index:90;pointer-events:none;white-space:nowrap;max-width:88%;}
+  box-shadow:0 6px 18px rgba(0,0,0,.4);opacity:0;z-index:90;pointer-events:none;max-width:88%;
+  white-space:pre-wrap;word-break:break-word;text-align:center;line-height:1.4;}
 .toast.show{animation:toast 1.9s cubic-bezier(.2,.8,.2,1) forwards;}
+/* 오류 메시지처럼 읽을 시간이 필요한 토스트 */
+.toast.long.show{animation-duration:8s;}
 @keyframes toast{0%{opacity:0;transform:translateX(-50%) translateY(18px)}12%{opacity:1;transform:translateX(-50%) translateY(0)}85%{opacity:1;transform:translateX(-50%) translateY(0)}100%{opacity:0;transform:translateX(-50%) translateY(-8px)}}
 .qprev{display:flex;align-items:center;justify-content:center;gap:5px;margin:0 8px 4px;min-height:22px;flex-wrap:wrap;}
 .qprev .lbl{font-family:'Jua';font-size:11px;color:#fff;background:rgba(18,26,36,.72);padding:3px 9px;border-radius:9px;}
@@ -1032,8 +1035,9 @@ function checkWin(){
   }
 }
 
-function toast(t){
+function toast(t,long){
   const el=$('#toast'); el.textContent=t;
+  el.classList.toggle('long', !!long);
   el.classList.remove('show'); void el.offsetWidth; el.classList.add('show');
 }
 
@@ -1217,11 +1221,11 @@ $('#retryBtn').addEventListener('click',()=>{ $('#overOverlay').classList.remove
     if(!NS || !NS.available) return;
 
     // 초기화가 실패한 상태였다면 원인을 먼저 보여준다 (adb 없이 확인 가능하도록)
-    if(lastError) toast('Hive: '+lastError);
+    if(lastError) toast('Hive: '+lastError, true);
 
     btn.disabled=true; btn.textContent='처리 중…';
     const done=res=>{
-      if(res && !res.ok && res.reason) toast('Hive: '+res.reason);
+      if(res && !res.ok && res.reason) toast('Hive: '+res.reason, true);
       reveal();
     };
     if(btn.dataset.signedIn) NS.hiveSignOut(done); else NS.hiveSignIn(done);

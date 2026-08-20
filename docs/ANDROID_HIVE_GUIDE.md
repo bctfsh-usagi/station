@@ -348,7 +348,25 @@ cd android
 2. **존(zone) 불일치** — 콘솔에 등록한 앱이 아직 sandbox 에만 있거나 real 에만 있을 수 있습니다.
    `hive.zone` 을 `SANDBOX` ↔ `REAL` 로 바꿔서 다시 빌드해 보세요.
    (Hive SDK 가 지원하는 값은 이 둘뿐입니다)
-3. **콘솔 등록 미완료** — App ID 등록 후 저장/검수 단계가 남아 있으면 서버가 앱을 모릅니다.
+3. **콘솔 등록 미완료** — App ID 등록 후 저장 단계가 남아 있으면 서버가 앱을 모릅니다.
+
+**`setup_failed: -13 / AuthV4InvalidParam` (Client authentication failed: unknown client.)**
+
+Hive 서버가 응답은 했지만 이 앱에 대한 `primaryClientId` 를 내려주지 않은 경우입니다.
+SDK 소스 기준으로 정확히 이 조건입니다 (`AuthV4Impl.setMetadataToConfiguration`):
+
+```kotlin
+return response.primaryClientId.isNotBlank().also {
+    if (it.not()) onSetupFail(... "Client authentication failed: unknown client.")
+}
+```
+
+즉 **콘솔에서 앱이 아직 완전히 활성화되지 않았다**는 뜻입니다. 확인 순서:
+
+1. Hive 콘솔 App ID 옆에 ⚠️ 경고가 남아 있는지 — 남아 있으면 아직 미완료입니다
+2. **로그인 종류에서 인증 키가 필요한 항목(Google Play, Google)을 끄고 `게스트`만 남긴 뒤 저장**
+   → 인증 키 미등록 상태가 해소되어 앱이 활성화됩니다
+3. `hive.zone` 이 앱을 등록한 콘솔과 맞는지 (일반 콘솔 = `REAL`, 샌드박스 콘솔 = `SANDBOX`)
 
 **게임 진행이 저장되지 않습니다**
 게임은 `localStorage` 를 씁니다. 앱 데이터를 지우면 함께 지워집니다.
