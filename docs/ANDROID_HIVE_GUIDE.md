@@ -361,12 +361,34 @@ return response.primaryClientId.isNotBlank().also {
 }
 ```
 
-즉 **콘솔에서 앱이 아직 완전히 활성화되지 않았다**는 뜻입니다. 확인 순서:
+`primaryClientId` 는 `provision/metadata-init-interaction` 응답의
+`oauth_clients_info` 배열에서 `issue_order == "0"` 인 항목의 `client_id` 입니다:
 
-1. Hive 콘솔 App ID 옆에 ⚠️ 경고가 남아 있는지 — 남아 있으면 아직 미완료입니다
-2. **로그인 종류에서 인증 키가 필요한 항목(Google Play, Google)을 끄고 `게스트`만 남긴 뒤 저장**
-   → 인증 키 미등록 상태가 해소되어 앱이 활성화됩니다
-3. `hive.zone` 이 앱을 등록한 콘솔과 맞는지 (일반 콘솔 = `REAL`, 샌드박스 콘솔 = `SANDBOX`)
+```kotlin
+oauthClientsInfo = data.optJSONArray("oauth_clients_info")?.also { clientsInfo ->
+    ...
+    if (client.optString("issue_order") == "0") {
+        primaryClientId = client.optString("client_id")
+    }
+}
+```
+
+**즉 이 App ID 에 OAuth 클라이언트가 아직 발급되지 않았다는 뜻입니다.**
+이건 앱 코드로는 해결할 수 없고, Hive 콘솔에서 처리해야 합니다. 확인 순서:
+
+1. App ID 옆 ⚠️ 경고가 남아 있는지 — 남아 있으면 프로비저닝 미완료입니다
+2. 콘솔에서 **OAuth 클라이언트 / 인증 정보 발급** 항목을 찾아 발급했는지
+3. 로그인 종류를 `게스트`만 남기고 **저장**했는지 (인증 키가 필요한 항목이 켜져 있으면 저장이 완료되지 않을 수 있습니다)
+4. `hive.zone` 이 앱을 등록한 콘솔과 맞는지 (일반 콘솔 = `REAL`, 샌드박스 콘솔 = `SANDBOX`)
+5. 설치된 APK 의 실제 패키지명이 등록한 App ID 와 **완전히 동일**한지
+   (`adb shell pm list packages | grep station`) — 접미사가 붙으면 다른 앱으로 취급됩니다
+
+그래도 안 되면 Hive 지원팀에 아래 내용으로 문의하는 것이 가장 빠릅니다:
+
+> App ID `com.station.nextstop` 로 `AuthV4.setup()` 호출 시
+> `provision/metadata-init-interaction` 응답의 `oauth_clients_info` 가 비어 있어
+> `-13 / AuthV4InvalidParam (unknown client)` 로 실패합니다.
+> 이 App ID 에 OAuth 클라이언트 발급이 필요한지 확인 부탁드립니다.
 
 **게임 진행이 저장되지 않습니다**
 게임은 `localStorage` 를 씁니다. 앱 데이터를 지우면 함께 지워집니다.

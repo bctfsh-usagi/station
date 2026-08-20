@@ -120,7 +120,9 @@ android {
 
     buildTypes {
         debug {
-            applicationIdSuffix = ".debug"
+            // applicationIdSuffix 를 쓰지 않는다.
+            // Hive 는 등록된 App ID(= 패키지명)로 앱을 식별하므로, 디버그 빌드의 패키지가
+            // com.station.nextstop.debug 가 되면 콘솔에 등록한 앱과 달라진다.
             isMinifyEnabled = false
         }
         release {
