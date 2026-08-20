@@ -78,6 +78,20 @@ jobs:
         working-directory: android
         run: ./gradlew --no-daemon assembleDebug
 
+      - name: Verify the game is actually inside the APK
+        working-directory: android
+        run: |
+          apk=$(ls app/build/outputs/apk/debug/*.apk | head -1)
+          echo "checking $apk"
+          # 게임 파일 복사가 조용히 실패하면 빈 웹뷰만 든 APK 가 나간다. 그걸 막는다.
+          unzip -l "$apk" | grep -q 'assets/game/index.html' \
+            || { echo "::error::assets/game/index.html missing from APK"; exit 1; }
+          unzip -l "$apk" | grep -q 'assets/game/assets/passengers/' \
+            || { echo "::error::game image assets missing from APK"; exit 1; }
+          unzip -l "$apk" | grep -q 'res/raw/hive_config.xml' \
+            || { echo "::error::hive_config.xml missing from APK"; exit 1; }
+          echo "APK contents OK"
+
       - name: Upload debug APK
         uses: actions/upload-artifact@v4
         with:
