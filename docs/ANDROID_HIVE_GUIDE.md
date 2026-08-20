@@ -17,12 +17,18 @@
 `index.html` 과 `assets/` 를 APK 의 `assets/game/` 으로 복사합니다.
 **게임을 고치면 웹과 APK 양쪽에 자동 반영**됩니다.
 
-> 검증 상태: GitHub Actions 에서 디버그 APK 빌드 **성공** (약 12.6MB).
-> Hive SDK 26.6.0 · AdMob 23.6.0 · UMP 3.1.0 이 정상 링크되고,
-> APK 안에 `assets/game/index.html`, 승객 이미지, `res/raw/hive_config.xml` 이
-> 실제로 들어있는지까지 CI 가 매번 확인합니다.
-> 다만 **실기기 실행과 광고 재생은 확인하지 못했습니다** — 폰에 설치해 보시고
-> 이상이 있으면 알려 주세요.
+> **검증 상태 (실기기 확인 완료)**
+>
+> | 항목 | 상태 |
+> |---|---|
+> | APK 빌드 (GitHub Actions) | ✅ |
+> | APK 안에 게임 파일 포함 | ✅ CI 가 매 빌드 확인 |
+> | 실기기 설치·실행 | ✅ |
+> | 게임 플레이 / 이미지 / 진행 저장 | ✅ |
+> | **보상형 광고 재생 + 보상 지급** | ✅ 실기기 확인 |
+> | Hive 로그인 | ❌ 콘솔 프로비저닝 이슈 (아래 4-6 참고) |
+>
+> Hive SDK 26.6.0 · AdMob 23.6.0 · UMP 3.1.0 이 정상 링크됩니다.
 
 ### 이미 동작하는 것 (설정 없이)
 
@@ -222,6 +228,21 @@ hive.zone=SANDBOX      # 개발 중에는 SANDBOX, 출시할 때 REAL
     <providers>...</providers>
 </properties>
 ```
+
+### 4-6. HIVE 인증키
+
+Hive 콘솔 **프로젝트 정보 → 기본정보 → HIVE 인증키** 값입니다.
+`provision/*` 요청 전부에 실려 나가므로(GCPSDK4-284) 설정하지 않으면
+서버가 클라이언트를 식별하지 못할 수 있습니다.
+
+**이 저장소는 공개이므로 `gradle.properties` 에 직접 적지 마세요.**
+
+- CI: 저장소 Settings → Secrets and variables → Actions →
+  `HIVE_CERTIFICATION_KEY` 로 등록 (워크플로가 주입합니다)
+- 로컬: `~/.gradle/gradle.properties` 에 `hive.certificationKey=...`
+
+값 자체는 APK 안에 들어가 추출 가능하므로 비밀번호가 아니라 앱 식별자에
+가깝지만, 저장소에 평문으로 남기지는 않습니다.
 
 ### 4-4. Google 로그인까지 쓰려면
 
