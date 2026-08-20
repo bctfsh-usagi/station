@@ -1,4 +1,4 @@
-package sh.bctf.nextstop
+package com.satstion.nextstop
 
 import android.webkit.JavascriptInterface
 import org.json.JSONObject

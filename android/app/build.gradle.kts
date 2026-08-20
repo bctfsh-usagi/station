@@ -75,11 +75,11 @@ val generateHiveConfig = tasks.register("generateHiveConfig") {
 }
 
 android {
-    namespace = "sh.bctf.nextstop"
+    namespace = "com.satstion.nextstop"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = prop("nextstop.applicationId", "sh.bctf.nextstop")
+        applicationId = prop("nextstop.applicationId", "com.satstion.nextstop")
         minSdk = 24
         targetSdk = 35
         versionCode = prop("nextstop.versionCode", "1").toInt()

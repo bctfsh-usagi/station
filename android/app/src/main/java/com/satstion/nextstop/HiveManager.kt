@@ -1,4 +1,4 @@
-package sh.bctf.nextstop
+package com.satstion.nextstop
 
 import android.app.Activity
 import android.util.Log
