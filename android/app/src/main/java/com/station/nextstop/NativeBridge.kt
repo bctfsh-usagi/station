@@ -1,4 +1,4 @@
-package com.satstion.nextstop
+package com.station.nextstop
 
 import android.webkit.JavascriptInterface
 import org.json.JSONObject

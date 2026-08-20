@@ -1,4 +1,4 @@
-package com.satstion.nextstop
+package com.station.nextstop
 
 import android.annotation.SuppressLint
 import android.content.ActivityNotFoundException

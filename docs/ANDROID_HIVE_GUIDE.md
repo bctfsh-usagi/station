@@ -196,14 +196,14 @@ admob.interstitialUnitId=ca-app-pub-1234567890123456/2222222222
 2. **프로젝트 생성** → 게임 이름 입력
 3. **앱 등록**: 플랫폼 `Android`, 패키지명은
    `android/gradle.properties` 의 `nextstop.applicationId` 와 **정확히 같아야** 합니다
-   (기본값 `com.satstion.nextstop` — 바꾸고 싶으면 여기서 바꾸세요)
+   (기본값 `com.station.nextstop` — 바꾸고 싶으면 여기서 바꾸세요)
 4. 발급된 **AppID** 를 복사
 
 ### 4-3. 값 채우기
 
 ```properties
 # android/gradle.properties
-nextstop.applicationId=com.satstion.nextstop
+nextstop.applicationId=com.station.nextstop
 hive.appId=여기에_콘솔에서_받은_AppID
 hive.zone=SANDBOX      # 개발 중에는 SANDBOX, 출시할 때 REAL
 ```

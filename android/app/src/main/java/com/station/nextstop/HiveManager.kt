@@ -1,4 +1,4 @@
-package com.satstion.nextstop
+package com.station.nextstop
 
 import android.app.Activity
 import android.util.Log
