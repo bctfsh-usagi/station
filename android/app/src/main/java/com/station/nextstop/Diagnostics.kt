@@ -19,7 +19,13 @@ import java.io.InputStreamReader
 object Diagnostics {
 
     private const val TAG = "NextStopDiag"
-    private const val MAX_CHARS = 180_000
+    private const val MAX_LINES = 120
+
+    /** Hive 통신·초기화와 관련된 줄만 남긴다. 전체 로그는 길어서 붙여넣기가 어렵다. */
+    private val INTERESTING = Regex(
+        "HIVE|hive|AuthV4|provision|metadata-init|qpyou|withhive|NextStop|Emulator",
+        RegexOption.IGNORE_CASE
+    )
 
     /**
      * 최근 로그를 모아 문자열로 돌려준다.
@@ -36,8 +42,14 @@ object Diagnostics {
             return "로그를 읽지 못했습니다: ${e.message}"
         }
 
-        val tail = if (raw.length > MAX_CHARS) raw.takeLast(MAX_CHARS) else raw
-        return redact(tail)
+        val filtered = raw.lineSequence()
+            .filter { INTERESTING.containsMatchIn(it) }
+            .toList()
+            .takeLast(MAX_LINES)
+            .joinToString("\n")
+
+        val body = filtered.ifBlank { raw.lineSequence().toList().takeLast(MAX_LINES).joinToString("\n") }
+        return redact(body)
     }
 
     /** 로그에 섞여 나올 수 있는 비밀값을 가린다. */
@@ -63,10 +75,20 @@ object Diagnostics {
             append("package=${BuildConfig.APPLICATION_ID}\n")
             append("versionName=${BuildConfig.VERSION_NAME}\n\n")
         }
+        val text = header + collect()
+
+        // Hive SDK 가 에뮬레이터 탐지 결과를 클립보드에 써넣기 때문에(useLog=true),
+        // 사용자가 "복사가 안 된다"고 느끼게 된다. 공유할 때 클립보드도 다시 채워준다.
+        runCatching {
+            val cm = activity.getSystemService(android.content.Context.CLIPBOARD_SERVICE)
+                as android.content.ClipboardManager
+            cm.setPrimaryClip(android.content.ClipData.newPlainText("NextStop diagnostics", text))
+        }
+
         val intent = Intent(Intent.ACTION_SEND).apply {
             type = "text/plain"
             putExtra(Intent.EXTRA_SUBJECT, "NextStop Hive 진단 로그")
-            putExtra(Intent.EXTRA_TEXT, header + collect())
+            putExtra(Intent.EXTRA_TEXT, text)
         }
         activity.startActivity(Intent.createChooser(intent, "진단 로그 보내기"))
     }
