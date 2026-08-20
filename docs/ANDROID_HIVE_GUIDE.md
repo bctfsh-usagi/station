@@ -340,8 +340,15 @@ cd android
 
 **Hive 로그인이 `setup_not_done` 을 반환합니다**
 `hive.appId` 가 비었거나 `AuthV4.setup()` 이 실패한 경우입니다.
-`adb logcat | grep NextStopHive` 로 실패 사유를 확인하세요.
-콘솔에 등록한 패키지명과 `nextstop.applicationId` 가 다르면 setup 이 실패합니다.
+`adb logcat | grep NextStopHive` 로 실패 사유를 확인하세요. 흔한 원인 순서:
+
+1. **패키지명 불일치** — Hive 콘솔의 App ID 와 `nextstop.applicationId` 가 달라야 합니다.
+   Hive 는 App ID 를 패키지명으로 쓰므로 둘이 **같은 값**이어야 합니다.
+   현재 둘 다 `com.station.nextstop` 입니다.
+2. **존(zone) 불일치** — 콘솔에 등록한 앱이 아직 sandbox 에만 있거나 real 에만 있을 수 있습니다.
+   `hive.zone` 을 `SANDBOX` ↔ `REAL` 로 바꿔서 다시 빌드해 보세요.
+   (Hive SDK 가 지원하는 값은 이 둘뿐입니다)
+3. **콘솔 등록 미완료** — App ID 등록 후 저장/검수 단계가 남아 있으면 서버가 앱을 모릅니다.
 
 **게임 진행이 저장되지 않습니다**
 게임은 `localStorage` 를 씁니다. 앱 데이터를 지우면 함께 지워집니다.
