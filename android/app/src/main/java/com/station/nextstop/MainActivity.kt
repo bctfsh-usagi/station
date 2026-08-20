@@ -191,12 +191,16 @@ class MainActivity : AppCompatActivity(), NativeBridge.Host {
         super.onResume()
         HiveActivity.onResume(this)
         webView.onResume()
-        webView.resumeTimers()
     }
 
     override fun onPause() {
+        // pauseTimers()/resumeTimers() 는 쓰지 않는다.
+        // 이 API 는 이 WebView 가 아니라 프로세스 안의 "모든" WebView 의 JS 타이머를 멈춘다.
+        // Hive 로그인/약관 화면도 WebView 라서, 그 화면이 우리 위에 뜨면서 이 Activity 가
+        // onPause 되는 순간 Hive 쪽 페이지의 JS 까지 얼어붙었다.
+        // 그 결과 페이지 로드가 끝나지 않아 mirror 주소로 넘어가고, 버튼이 눌리지 않다가
+        // 결국 -6(CANCELED) 로 실패했다. onPause() 는 이 WebView 에만 적용되므로 안전하다.
         webView.onPause()
-        webView.pauseTimers()
         HiveActivity.onPause(this)
         super.onPause()
     }

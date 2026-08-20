@@ -282,6 +282,26 @@ Configuration.useHercules = false
 
 게임 보안을 쓰려면 대신 `com.com2us.android.hive:hive-hercules` 의존성을 추가해야 합니다.
 
+### 4-5-2. Hive 로그인 화면이 로딩만 하고 버튼이 안 눌린다면
+
+게임을 WebView 로 감싼 앱에서 흔히 밟는 함정입니다.
+
+```kotlin
+// 하면 안 되는 것
+override fun onPause() {
+    webView.pauseTimers()   // 프로세스 안의 "모든" WebView JS 타이머를 멈춘다
+}
+```
+
+`WebView.pauseTimers()` 는 해당 인스턴스가 아니라 **프로세스 전체**에 적용됩니다.
+Hive 의 로그인·약관 화면도 WebView 이므로, 그 화면이 게임 위에 떠서 게임 Activity 가
+`onPause` 되는 순간 **Hive 페이지의 JS 까지 멈춥니다.**
+
+증상: 로딩 스피너가 계속 돌고 → `[AuthV4WebView] Mirror Url` 로 폴백하고 →
+화면은 그려지지만 버튼이 눌리지 않고 → 결국 `sign_in_failed: -6` (CANCELED).
+
+`webView.onPause()` 는 해당 WebView 에만 적용되므로 그것만 쓰면 됩니다.
+
 ### 4-6. HIVE 인증키
 
 Hive 콘솔 **프로젝트 정보 → 기본정보 → HIVE 인증키** 값입니다.
