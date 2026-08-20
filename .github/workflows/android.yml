@@ -61,6 +61,7 @@ jobs:
           ADMOB_INTERSTITIAL_UNIT_ID: ${{ secrets.ADMOB_INTERSTITIAL_UNIT_ID }}
           HIVE_APP_ID: ${{ secrets.HIVE_APP_ID }}
           HIVE_ZONE: ${{ secrets.HIVE_ZONE }}
+          HIVE_CERTIFICATION_KEY: ${{ secrets.HIVE_CERTIFICATION_KEY }}
           HIVE_GOOGLE_SERVER_CLIENT_ID: ${{ secrets.HIVE_GOOGLE_SERVER_CLIENT_ID }}
         run: |
           # 시크릿이 비어 있으면 gradle.properties 의 기본값(= 구글 테스트 광고 / Hive 비활성)이 그대로 쓰인다.
@@ -70,6 +71,7 @@ jobs:
             [ -n "$ADMOB_INTERSTITIAL_UNIT_ID" ]    && echo "admob.interstitialUnitId=$ADMOB_INTERSTITIAL_UNIT_ID"
             [ -n "$HIVE_APP_ID" ]                   && echo "hive.appId=$HIVE_APP_ID"
             [ -n "$HIVE_ZONE" ]                     && echo "hive.zone=$HIVE_ZONE"
+            [ -n "$HIVE_CERTIFICATION_KEY" ]        && echo "hive.certificationKey=$HIVE_CERTIFICATION_KEY"
             [ -n "$HIVE_GOOGLE_SERVER_CLIENT_ID" ]  && echo "hive.googleServerClientId=$HIVE_GOOGLE_SERVER_CLIENT_ID"
             true
           } >> android/gradle.properties
@@ -84,6 +86,13 @@ jobs:
           # Hive 로그인 문제를 디버깅할 때 어떤 설정으로 빌드됐는지 바로 보이게 한다.
           # (AppID 는 APK 안에 그대로 들어가는 값이라 비밀이 아니다)
           cat app/build/generated/hiveRes/raw/hive_config.xml
+          # 인증키는 hive_config.xml 이 아니라 BuildConfig 로 들어가므로 위 출력에는 없다.
+          # 설정 여부만 알린다 (값은 절대 출력하지 않는다).
+          if [ -n "${{ secrets.HIVE_CERTIFICATION_KEY }}" ]; then
+            echo "hive.certificationKey: set (from repository secret)"
+          else
+            echo "hive.certificationKey: NOT set"
+          fi
 
       - name: Verify the game is actually inside the APK
         working-directory: android

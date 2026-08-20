@@ -65,6 +65,12 @@ class HiveManager(private val activity: Activity) {
                 Configuration.ZoneType.valueOf(BuildConfig.HIVE_ZONE)
             }.getOrDefault(Configuration.ZoneType.SANDBOX)
             Configuration.useLog = BuildConfig.DEBUG
+            // Hive 콘솔 > 프로젝트 정보 > 기본정보 > "HIVE 인증키".
+            // provision/metadata-init-interaction 을 포함한 모든 프로비저닝 요청에 실려 나간다.
+            // 비어 있으면 서버가 클라이언트를 식별하지 못해 "unknown client" 로 실패한다.
+            if (BuildConfig.HIVE_CERTIFICATION_KEY.isNotBlank()) {
+                Configuration.hiveCertificationKey = BuildConfig.HIVE_CERTIFICATION_KEY
+            }
         } catch (t: Throwable) {
             Log.e(TAG, "Hive configuration failed", t)
             setupInProgress = false
@@ -183,6 +189,7 @@ class HiveManager(private val activity: Activity) {
         .put("lastError", lastSetupError)
         .put("appId", BuildConfig.HIVE_APP_ID)
         .put("zone", BuildConfig.HIVE_ZONE)
+        .put("hasCertificationKey", BuildConfig.HIVE_CERTIFICATION_KEY.isNotBlank())
 
     private fun playerJson(info: AuthV4.PlayerInfo): JSONObject = JSONObject()
         .put("ok", true)

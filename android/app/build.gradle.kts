@@ -22,6 +22,7 @@ val usingTestAds = admobAppId == testAdmobAppId
 
 val hiveAppId = prop("hive.appId")
 val hiveZone = prop("hive.zone", "SANDBOX").uppercase()
+val hiveCertificationKey = prop("hive.certificationKey")
 
 /**
  * 게임 원본(리포지토리 최상단의 index.html, assets/)을 APK 의 assets/game/ 으로 복사한다.
@@ -93,6 +94,7 @@ android {
         buildConfigField("boolean", "USING_TEST_ADS", "$usingTestAds")
         buildConfigField("String", "HIVE_APP_ID", "\"$hiveAppId\"")
         buildConfigField("String", "HIVE_ZONE", "\"$hiveZone\"")
+        buildConfigField("String", "HIVE_CERTIFICATION_KEY", "\"$hiveCertificationKey\"")
     }
 
     // 주의: assets srcDir 은 복사 대상의 *부모* 여야 APK 안에서 assets/game/... 경로가 된다.
