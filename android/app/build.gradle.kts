@@ -62,6 +62,13 @@ val generateHiveConfig = tasks.register("generateHiveConfig") {
 <properties>
     <appId>$appId</appId>
     <useLog>true</useLog>
+    <!--
+        Hive 로그인 UI 는 웹뷰로 외부 페이지를 띄우는데, 기본 8초 안에 로드가
+        끝나지 않으면 대체(mirror) 주소로 갈아탄다. 그 과정에서 페이지가
+        반쪽만 그려져 버튼이 눌리지 않는 일이 있어 넉넉히 잡는다.
+    -->
+    <httpConnectTimeout>20</httpConnectTimeout>
+    <httpReadTimeout>20</httpReadTimeout>
     <company>C2S</company>
     <channel>C2S</channel>
     <market>GO</market>
