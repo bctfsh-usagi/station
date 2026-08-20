@@ -95,8 +95,10 @@ android {
         buildConfigField("String", "HIVE_ZONE", "\"$hiveZone\"")
     }
 
-    sourceSets["main"].assets.srcDir(copyGameAssets.map { it.destinationDir })
-    sourceSets["main"].res.srcDir(generateHiveConfig)
+    // 주의: assets srcDir 은 복사 대상의 *부모* 여야 APK 안에서 assets/game/... 경로가 된다.
+    //       (gameAssets/game 을 직접 가리키면 assets/index.html 로 들어가 버린다)
+    sourceSets["main"].assets.srcDir(layout.buildDirectory.dir("generated/gameAssets"))
+    sourceSets["main"].res.srcDir(layout.buildDirectory.dir("generated/hiveRes"))
 
     signingConfigs {
         // 릴리스 서명 정보는 저장소에 커밋하지 않는다.
@@ -145,6 +147,10 @@ android {
     packaging {
         resources.excludes += setOf("META-INF/*.kotlin_module", "META-INF/DEPENDENCIES")
     }
+}
+
+tasks.named("preBuild") {
+    dependsOn(copyGameAssets, generateHiveConfig)
 }
 
 dependencies {
