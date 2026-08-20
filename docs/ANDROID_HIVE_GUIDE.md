@@ -259,6 +259,29 @@ Hive 공식 문서(IdP 콘솔 키 안내)의 경고:
 "설정 제외"(콘솔·hive_config 양쪽 입력 불필요)지만, 보안 키는 IdP 와 무관한
 별도의 필수 단계입니다.
 
+### 4-5-1. 앱이 로그인 직전에 소리 없이 종료된다면 (Hercules)
+
+`AuthV4.setup()` 이 성공한 직후 앱이 크래시 없이 사라지면 게임 보안(Hercules) 때문입니다.
+
+```kotlin
+// HiveSdkLifecycle.onSetupFinished()
+if (ConfigurationImpl.getUseHercules()) {
+    try { Class.forName("com.hive.hercules.HerculesInitializer") }
+    catch (e: Exception) { Android.finish() }   // finishAffinity + exitProcess(0)
+}
+```
+
+`Configuration.useHercules` 의 **기본값이 true** 라서, Hercules 모듈을 넣지 않은 앱은
+setup 이 끝나는 순간 종료됩니다. 크래시가 아니라 `exitProcess` 라 스택 트레이스도 남지 않습니다.
+
+이 프로젝트는 게임 보안을 쓰지 않으므로 `HiveManager.setup()` 에서 꺼 둡니다:
+
+```kotlin
+Configuration.useHercules = false
+```
+
+게임 보안을 쓰려면 대신 `com.com2us.android.hive:hive-hercules` 의존성을 추가해야 합니다.
+
 ### 4-6. HIVE 인증키
 
 Hive 콘솔 **프로젝트 정보 → 기본정보 → HIVE 인증키** 값입니다.

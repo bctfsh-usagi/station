@@ -65,6 +65,13 @@ class HiveManager(private val activity: Activity) {
                 Configuration.ZoneType.valueOf(BuildConfig.HIVE_ZONE)
             }.getOrDefault(Configuration.ZoneType.SANDBOX)
             Configuration.useLog = BuildConfig.DEBUG
+
+            // Hive 게임 보안(Hercules) 모듈을 넣지 않았으므로 반드시 꺼야 한다.
+            // 기본값이 true 라서, 켜진 채로 두면 HiveSdkLifecycle.onSetupFinished 가
+            //   Class.forName("com.hive.hercules.HerculesInitializer")
+            // 에 실패하고 Android.finish() 로 앱 프로세스를 그대로 종료시킨다.
+            // (크래시가 아니라 exitProcess 라서 스택 트레이스조차 남지 않는다)
+            Configuration.useHercules = false
             // Hive 콘솔 > 프로젝트 정보 > 기본정보 > "HIVE 인증키".
             // provision/metadata-init-interaction 을 포함한 모든 프로비저닝 요청에 실려 나간다.
             // 비어 있으면 서버가 클라이언트를 식별하지 못해 "unknown client" 로 실패한다.
