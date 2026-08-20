@@ -78,6 +78,13 @@ jobs:
         working-directory: android
         run: ./gradlew --no-daemon assembleDebug
 
+      - name: Show generated hive_config.xml
+        working-directory: android
+        run: |
+          # Hive 로그인 문제를 디버깅할 때 어떤 설정으로 빌드됐는지 바로 보이게 한다.
+          # (AppID 는 APK 안에 그대로 들어가는 값이라 비밀이 아니다)
+          cat app/build/generated/hiveRes/raw/hive_config.xml
+
       - name: Verify the game is actually inside the APK
         working-directory: android
         run: |
