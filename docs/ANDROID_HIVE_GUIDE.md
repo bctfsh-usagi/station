@@ -229,6 +229,18 @@ hive.zone=SANDBOX      # 개발 중에는 SANDBOX, 출시할 때 REAL
 </properties>
 ```
 
+### 4-7. Hive 없이 먼저 출시하기
+
+Hive 프로비저닝이 풀리지 않으면 Hive 만 끄고 출시할 수 있습니다.
+
+```properties
+# android/gradle.properties
+hive.appId=
+```
+
+이렇게 두고 빌드하면 Hive 초기화를 아예 시도하지 않고, 타이틀의 로그인 버튼도
+숨겨집니다. 게임과 광고는 그대로 동작합니다. 나중에 값만 다시 채우면 됩니다.
+
 ### 4-6. HIVE 인증키
 
 Hive 콘솔 **프로젝트 정보 → 기본정보 → HIVE 인증키** 값입니다.
@@ -404,12 +416,38 @@ oauthClientsInfo = data.optJSONArray("oauth_clients_info")?.also { clientsInfo -
 5. 설치된 APK 의 실제 패키지명이 등록한 App ID 와 **완전히 동일**한지
    (`adb shell pm list packages | grep station`) — 접미사가 붙으면 다른 앱으로 취급됩니다
 
-그래도 안 되면 Hive 지원팀에 아래 내용으로 문의하는 것이 가장 빠릅니다:
+**실제로 시도해 배제된 원인들** (모두 동일한 오류가 재현됨):
 
-> App ID `com.station.nextstop` 로 `AuthV4.setup()` 호출 시
-> `provision/metadata-init-interaction` 응답의 `oauth_clients_info` 가 비어 있어
-> `-13 / AuthV4InvalidParam (unknown client)` 로 실패합니다.
-> 이 App ID 에 OAuth 클라이언트 발급이 필요한지 확인 부탁드립니다.
+| 가설 | 결과 |
+|---|---|
+| `hive.zone` = SANDBOX / REAL | 둘 다 동일 |
+| 디버그 빌드의 `.debug` 패키지 접미사 | 제거해도 동일 |
+| 로그인 종류를 게스트만 남기고 저장 | 동일 |
+| 콘솔의 "HIVE 인증 상태" 활성화 | 동일 |
+| `hive.certificationKey` 주입 | 동일 (빌드 로그에서 주입 확인됨) |
+| company / channel / market 값 | 해당 요청에 실리지 않아 구조적으로 무관 |
+
+따라서 이 오류는 **앱/SDK 설정이 아니라 콘솔 계정 측 프로비저닝** 문제입니다.
+Hive 지원팀에 아래 내용으로 문의하는 것이 가장 빠릅니다:
+
+> **App ID 에 OAuth 클라이언트가 발급되지 않습니다**
+>
+> - 프로젝트: [3694] station
+> - App ID: `com.station.nextstop` (Android / Google Play)
+> - SDK: Hive SDK v4 Android 26.6.0
+>
+> `AuthV4.setup()` 이 아래 오류로 실패합니다.
+> `-13 / AuthV4InvalidParam / [AuthV4-Common] Invalid param : Client authentication failed: unknown client.`
+>
+> SDK 코드 확인 결과 `provision/metadata-init-interaction` 응답의
+> `oauth_clients_info` 배열이 비어 있어 `primaryClientId` 가 채워지지 않는 것이 원인입니다.
+>
+> 아래는 모두 시도했으나 동일합니다:
+> zone real/sandbox 양쪽, 로그인 종류 게스트만 지정 후 저장,
+> HIVE 인증 상태 활성화, HIVE 인증키 설정, 패키지명과 App ID 완전 일치.
+> 콘솔에는 경고 표시가 없는 상태입니다.
+>
+> 이 App ID 에 OAuth 클라이언트를 발급받으려면 어떤 절차가 필요한지 확인 부탁드립니다.
 
 **게임 진행이 저장되지 않습니다**
 게임은 `localStorage` 를 씁니다. 앱 데이터를 지우면 함께 지워집니다.
