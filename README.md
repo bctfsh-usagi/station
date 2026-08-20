@@ -19,3 +19,12 @@
 - 하차 승객이 남아 있으면 플랫폼 승객을 태울 수 없습니다.
 - 플랫폼 승객은 옷색과 같은 목적지 칸에 태워야 합니다.
 - 플랫폼 승객 UI 겹침을 줄이기 위해 성별/탑승 태그를 제거했습니다.
+
+## 안드로이드 APK / 하이브 / 광고
+
+안드로이드 앱으로 빌드하고 실제 광고와 Hive 로그인을 붙이는 방법은
+**[docs/ANDROID_HIVE_GUIDE.md](docs/ANDROID_HIVE_GUIDE.md)** 를 보세요.
+
+- 앱 프로젝트: `android/` (Android Studio 로 이 폴더를 엽니다)
+- APK 자동 빌드: GitHub **Actions → Android APK → Run workflow** → Artifacts 에서 다운로드
+- 설정값은 전부 `android/gradle.properties` 한 파일에 모여 있습니다
