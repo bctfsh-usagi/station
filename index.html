@@ -478,9 +478,10 @@ body{
   };
 
   /* Hive SDK 초기화 완료 통보 */
-  window.__nsHiveReady = function(ok){
+  window.__nsHiveReady = function(ok, message){
     NS.hiveReady = (ok === true || ok === 'true');
-    try { window.dispatchEvent(new CustomEvent('ns-hive-ready', {detail:{ok:NS.hiveReady}})); } catch(e){}
+    NS.hiveMessage = message || '';
+    try { window.dispatchEvent(new CustomEvent('ns-hive-ready', {detail:{ok:NS.hiveReady, message:NS.hiveMessage}})); } catch(e){}
   };
 
   function callAsync(method, cb){
@@ -503,6 +504,7 @@ body{
   var NS = {
     available: !!native_,
     hiveReady: false,
+    hiveMessage: '',
     caps: safe(function(){ return native_ ? JSON.parse(native_.capabilities()) : {}; }, {}),
 
     /* --- 광고 --- */
@@ -514,6 +516,7 @@ body{
     /* --- Hive 로그인 --- */
     hiveEnabled:       function(){ return safe(function(){ return !!(native_ && native_.hiveEnabled()); }, false); },
     hiveCurrentPlayer: function(){ return safe(function(){ return native_ ? JSON.parse(native_.hiveCurrentPlayer()) : {ok:false, reason:'no_native'}; }, {ok:false, reason:'parse_error'}); },
+    hiveStatus:        function(){ return safe(function(){ return native_ ? JSON.parse(native_.hiveStatus()) : {}; }, {}); },
     hiveSignIn:        function(cb){ callAsync('hiveSignIn', cb); },
     hiveSignInGuest:   function(cb){ callAsync('hiveSignInGuest', cb); },
     hiveSignOut:       function(cb){ callAsync('hiveSignOut', cb); }
@@ -1181,22 +1184,46 @@ $('#retryBtn').addEventListener('click',()=>{ $('#overOverlay').classList.remove
     }
   }
 
+  let lastError='';
+
   function reveal(){
     const NS=window.NS_NATIVE;
     if(!NS || !NS.available || !NS.hiveEnabled()) return;   // 웹이거나 Hive 미설정이면 계속 숨김
     btn.hidden=false;
-    render(NS.hiveCurrentPlayer());
+
+    const st=NS.hiveStatus()||{};
+    if(st.setupDone){
+      // 연결 완료 — 로그인 가능
+      btn.disabled=false; lastError='';
+      render(NS.hiveCurrentPlayer());
+    } else if(st.setupInProgress || (!st.lastError && !NS.hiveReady)){
+      // 아직 초기화 중. 이때 누르면 무조건 실패하므로 아예 못 누르게 한다.
+      btn.disabled=true; btn.textContent='Hive 연결 중…';
+    } else {
+      // 초기화 실패 — 누르면 재시도되도록 열어둔다
+      btn.disabled=false; lastError=st.lastError||NS.hiveMessage||'';
+      btn.textContent='Hive 연결 실패 · 재시도';
+      delete btn.dataset.signedIn;
+    }
   }
 
   window.addEventListener('ns-hive-ready', reveal);
-  reveal();   // 이미 준비된 뒤에 이 스크립트가 도는 경우 대비
+  reveal();                       // 이미 준비된 뒤에 이 스크립트가 도는 경우 대비
+  setInterval(reveal, 1500);      // setup 은 비동기라 상태가 바뀌면 따라간다
 
   btn.addEventListener('click', e=>{
     e.stopPropagation();          // 타이틀 화면의 "탭해서 시작"이 같이 눌리지 않게
     const NS=window.NS_NATIVE;
     if(!NS || !NS.available) return;
-    btn.disabled=true;
-    const done=res=>{ btn.disabled=false; render(NS.hiveCurrentPlayer()); if(res && !res.ok && res.reason) toast('Hive: '+res.reason); };
+
+    // 초기화가 실패한 상태였다면 원인을 먼저 보여준다 (adb 없이 확인 가능하도록)
+    if(lastError) toast('Hive: '+lastError);
+
+    btn.disabled=true; btn.textContent='처리 중…';
+    const done=res=>{
+      if(res && !res.ok && res.reason) toast('Hive: '+res.reason);
+      reveal();
+    };
     if(btn.dataset.signedIn) NS.hiveSignOut(done); else NS.hiveSignIn(done);
   });
 })();

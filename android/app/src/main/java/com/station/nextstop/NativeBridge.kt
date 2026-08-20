@@ -66,6 +66,10 @@ class NativeBridge(private val host: Host) {
     @JavascriptInterface
     fun hiveEnabled(): Boolean = host.hive.isEnabled
 
+    /** setup 완료 여부와 마지막 실패 사유. UI 가 버튼 상태를 정하는 데 쓴다. */
+    @JavascriptInterface
+    fun hiveStatus(): String = host.hive.statusJson().toString()
+
     @JavascriptInterface
     fun hiveCurrentPlayer(): String = host.hive.currentPlayer().toString()
 

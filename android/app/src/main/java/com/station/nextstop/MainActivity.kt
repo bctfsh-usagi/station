@@ -117,7 +117,8 @@ class MainActivity : AppCompatActivity(), NativeBridge.Host {
             Log.i(TAG, "hive setup: success=$success ($message)")
             runOnUi {
                 webView.evaluateJavascript(
-                    "window.__nsHiveReady && window.__nsHiveReady($success);",
+                    "window.__nsHiveReady && window.__nsHiveReady(" +
+                        "$success, ${JSONObject.quote(message)});",
                     null
                 )
             }

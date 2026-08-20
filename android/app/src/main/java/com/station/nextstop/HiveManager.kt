@@ -28,6 +28,14 @@ class HiveManager(private val activity: Activity) {
     var isSetupDone: Boolean = false
         private set
 
+    /** 마지막 setup 실패 사유. UI 에 그대로 보여줘서 adb 없이도 원인을 알 수 있게 한다. */
+    @Volatile
+    var lastSetupError: String = ""
+        private set
+
+    @Volatile
+    private var setupInProgress: Boolean = false
+
     @Volatile
     private var autoSignInAvailable: Boolean = false
 
@@ -40,6 +48,15 @@ class HiveManager(private val activity: Activity) {
             onReady(false, "hive_not_configured")
             return
         }
+        if (isSetupDone) {
+            onReady(true, "already_setup")
+            return
+        }
+        if (setupInProgress) {
+            onReady(false, "setup_in_progress")
+            return
+        }
+        setupInProgress = true
 
         try {
             Configuration.context = activity
@@ -50,7 +67,9 @@ class HiveManager(private val activity: Activity) {
             Configuration.useLog = BuildConfig.DEBUG
         } catch (t: Throwable) {
             Log.e(TAG, "Hive configuration failed", t)
-            onReady(false, "configuration_failed: ${t.message}")
+            setupInProgress = false
+            lastSetupError = "configuration_failed: ${t.message}"
+            onReady(false, lastSetupError)
             return
         }
 
@@ -61,14 +80,18 @@ class HiveManager(private val activity: Activity) {
                 did: String?,
                 providerTypeList: ArrayList<AuthV4.ProviderType>?
             ) {
+                setupInProgress = false
                 if (result.isSuccess) {
                     isSetupDone = true
+                    lastSetupError = ""
                     autoSignInAvailable = isAutoSignIn
                     Log.i(TAG, "AuthV4.setup ok (autoSignIn=$isAutoSignIn, did=$did)")
                     onReady(true, if (isAutoSignIn) "auto_sign_in_available" else "setup_done")
                 } else {
+                    // errorCode 만으로는 원인을 알기 어려워 서버가 준 메시지까지 함께 남긴다.
+                    lastSetupError = "setup_failed: ${result.errorCode} / ${result.code} / ${result.message}"
                     Log.w(TAG, "AuthV4.setup failed: $result")
-                    onReady(false, "setup_failed: ${result.errorCode}")
+                    onReady(false, lastSetupError)
                 }
             }
         })
@@ -84,7 +107,11 @@ class HiveManager(private val activity: Activity) {
             return
         }
         if (!isSetupDone) {
-            onResult(fail("setup_not_done"))
+            // setup 이 아직 안 끝났거나 실패한 상태. 버튼을 누른 김에 한 번 더 시도한다.
+            setup { success, message ->
+                if (success) signIn(onResult)
+                else onResult(fail("setup_not_done: $message"))
+            }
             return
         }
 
@@ -113,7 +140,10 @@ class HiveManager(private val activity: Activity) {
             return
         }
         if (!isSetupDone) {
-            onResult(fail("setup_not_done"))
+            setup { success, message ->
+                if (success) signInGuest(onResult)
+                else onResult(fail("setup_not_done: $message"))
+            }
             return
         }
         AuthV4.signIn(AuthV4.ProviderType.GUEST, object : AuthV4.AuthV4SignInListener {
@@ -144,6 +174,15 @@ class HiveManager(private val activity: Activity) {
             ?: return fail("not_signed_in")
         return playerJson(info)
     }
+
+    /** UI 가 버튼 상태를 정할 수 있도록 현재 Hive 상태를 노출한다. */
+    fun statusJson(): JSONObject = JSONObject()
+        .put("enabled", isEnabled)
+        .put("setupDone", isSetupDone)
+        .put("setupInProgress", setupInProgress)
+        .put("lastError", lastSetupError)
+        .put("appId", BuildConfig.HIVE_APP_ID)
+        .put("zone", BuildConfig.HIVE_ZONE)
 
     private fun playerJson(info: AuthV4.PlayerInfo): JSONObject = JSONObject()
         .put("ok", true)
