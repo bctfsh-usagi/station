@@ -241,6 +241,24 @@ hive.appId=
 이렇게 두고 빌드하면 Hive 초기화를 아예 시도하지 않고, 타이틀의 로그인 버튼도
 숨겨집니다. 게임과 광고는 그대로 동작합니다. 나중에 값만 다시 채우면 됩니다.
 
+### 4-5. 보안 키 발급 (필수 · 빠뜨리기 쉬움)
+
+**하이브 콘솔 → 보안 키 설정 → 보안 키 발급**
+
+Hive 공식 문서(IdP 콘솔 키 안내)의 경고:
+
+> 서비스 간 인증 보안 강화를 위해 *하이브 콘솔 > 보안 키 설정*에서 보안 키를 반드시 발급받아야 합니다.
+> **보안 키를 발급받지 않으면, 사용자는 게임 앱에서 로그인할 수 없습니다.**
+
+이 단계를 빠뜨리면 `AuthV4.setup()` 이
+`-13 / AuthV4InvalidParam (Client authentication failed: unknown client.)` 로 실패합니다.
+`provision/metadata-init-interaction` 응답의 `oauth_clients_info` 가 비어서
+`primaryClientId` 가 채워지지 않기 때문입니다.
+
+게스트 로그인만 쓰더라도 필요합니다. 같은 문서 표에서 Guest / Android 는
+"설정 제외"(콘솔·hive_config 양쪽 입력 불필요)지만, 보안 키는 IdP 와 무관한
+별도의 필수 단계입니다.
+
 ### 4-6. HIVE 인증키
 
 Hive 콘솔 **프로젝트 정보 → 기본정보 → HIVE 인증키** 값입니다.
