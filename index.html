@@ -1245,6 +1245,9 @@ $('#retryBtn').addEventListener('click',()=>{ $('#overOverlay').classList.remove
     btn.disabled=true; btn.textContent='처리 중…';
     const done=res=>{
       if(res && !res.ok && res.reason) toast('Hive: '+res.reason, true);
+      // playerId 는 숫자값이라 버튼에는 이름만 뜬다. 콘솔에서 유저를 조회할 때 필요하므로
+      // 로그인 성공 시 한 번 띄워 준다.
+      else if(res && res.ok && res.playerId) toast('Hive 로그인 성공\nplayerId: '+res.playerId+'\nname: '+(res.playerName||'-'), true);
       reveal();
     };
     if(btn.dataset.signedIn) NS.hiveSignOut(done); else NS.hiveSignIn(done);

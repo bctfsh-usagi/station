@@ -102,15 +102,23 @@ object Diagnostics {
         share(activity, prefix = crashReport + "\n\n=== 이번 실행 로그 ===\n")
     }
 
+    /** 콘솔에서 유저를 조회할 때 필요한 값이라 헤더에 같이 적는다. */
+    private fun playerLine(): String = runCatching {
+        val info = com.hive.AuthV4.getPlayerInfo() ?: return@runCatching "not signed in"
+        "id=" + info.playerId + ", name=" + info.playerName
+    }.getOrElse { "unavailable" }
+
     /** 공유 시트를 띄워 로그를 밖으로 보낼 수 있게 한다. */
     fun share(activity: Activity, prefix: String = "") {
+        val playerLine = playerLine()
         val header = buildString {
             append("=== NextStop 진단 로그 ===\n")
             append("appId=${BuildConfig.HIVE_APP_ID}\n")
             append("zone=${BuildConfig.HIVE_ZONE}\n")
             append("certKey=${if (BuildConfig.HIVE_CERTIFICATION_KEY.isNotBlank()) "set" else "NOT set"}\n")
             append("package=${BuildConfig.APPLICATION_ID}\n")
-            append("versionName=${BuildConfig.VERSION_NAME}\n\n")
+            append("versionName=${BuildConfig.VERSION_NAME}\n")
+            append("player=$playerLine\n\n")
         }
         val text = header + prefix + collect()
 
