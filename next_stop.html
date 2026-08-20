@@ -441,6 +441,72 @@ body{
 </div>
 
 <script>
+/* ==========================================================================
+   NextStop native bridge
+   --------------------------------------------------------------------------
+   안드로이드 APK 안에서 실행될 때만 window.NextStopNative 가 주입된다.
+   웹(GitHub Pages)에서는 이 객체가 없으므로 available === false 가 되고,
+   게임은 기존의 더미 광고 화면으로 그대로 동작한다.
+   네이티브 구현: android/app/src/main/java/sh/bctf/nextstop/NativeBridge.kt
+   ========================================================================== */
+(function(){
+  var native_ = (typeof window.NextStopNative !== 'undefined') ? window.NextStopNative : null;
+  var pending = {};
+  var seq = 0;
+
+  /* 네이티브가 비동기 결과를 돌려줄 때 호출하는 진입점 */
+  window.__nsNativeResolve = function(id, json){
+    var cb = pending[id];
+    delete pending[id];
+    if(!cb) return;
+    var data;
+    try { data = JSON.parse(json); } catch(e) { data = {ok:false, reason:'bad_payload'}; }
+    cb(data);
+  };
+
+  /* Hive SDK 초기화 완료 통보 */
+  window.__nsHiveReady = function(ok){ NS.hiveReady = (ok === true || ok === 'true'); };
+
+  function callAsync(method, cb){
+    cb = cb || function(){};
+    if(!native_ || typeof native_[method] !== 'function'){ cb({ok:false, reason:'no_native'}); return; }
+    var id = 'r' + (++seq);
+    pending[id] = cb;
+    try {
+      native_[method](id);
+    } catch(e) {
+      delete pending[id];
+      cb({ok:false, reason:'bridge_error'});
+    }
+  }
+
+  function safe(fn, fallback){
+    try { return fn(); } catch(e) { return fallback; }
+  }
+
+  var NS = {
+    available: !!native_,
+    hiveReady: false,
+    caps: safe(function(){ return native_ ? JSON.parse(native_.capabilities()) : {}; }, {}),
+
+    /* --- 광고 --- */
+    isRewardedReady:     function(){ return safe(function(){ return !!(native_ && native_.isRewardedReady()); }, false); },
+    showRewardedAd:      function(cb){ callAsync('showRewardedAd', cb); },
+    isInterstitialReady: function(){ return safe(function(){ return !!(native_ && native_.isInterstitialReady()); }, false); },
+    showInterstitialAd:  function(cb){ callAsync('showInterstitialAd', cb); },
+
+    /* --- Hive 로그인 --- */
+    hiveEnabled:       function(){ return safe(function(){ return !!(native_ && native_.hiveEnabled()); }, false); },
+    hiveCurrentPlayer: function(){ return safe(function(){ return native_ ? JSON.parse(native_.hiveCurrentPlayer()) : {ok:false, reason:'no_native'}; }, {ok:false, reason:'parse_error'}); },
+    hiveSignIn:        function(cb){ callAsync('hiveSignIn', cb); },
+    hiveSignInGuest:   function(cb){ callAsync('hiveSignInGuest', cb); },
+    hiveSignOut:       function(cb){ callAsync('hiveSignOut', cb); }
+  };
+
+  window.NS_NATIVE = NS;
+})();
+</script>
+<script>
 /* =========================================================
    다음 정거장은.. — 지하철 승하차 퍼즐
    ========================================================= */
@@ -1012,8 +1078,18 @@ $('#title').addEventListener('click',()=>{
 $('#howClose').addEventListener('click',()=>$('#howOverlay').classList.remove('on'));
 $('#nextBtn').addEventListener('click',()=>{
   $('#winOverlay').classList.remove('on'); stopTicker();
-  if(levelIdx>=LEVELS.length-1){ levelIdx=0; SAVE.level=0; saveSave(); show('#title'); }
-  else { levelIdx++; show('#game'); startLevel(levelIdx); }
+  const advance=()=>{
+    if(levelIdx>=LEVELS.length-1){ levelIdx=0; SAVE.level=0; saveSave(); show('#title'); }
+    else { levelIdx++; show('#game'); startLevel(levelIdx); }
+  };
+  // APK 에서만, 두 스테이지마다 전면 광고를 한 번 띄운다.
+  // (첫 스테이지 직후와 매 스테이지 노출은 이탈률이 커서 피한다.)
+  const NS=window.NS_NATIVE;
+  if(NS && NS.available && levelIdx>0 && (levelIdx+1)%2===0 && NS.isInterstitialReady()){
+    NS.showInterstitialAd(()=>advance());
+    return;
+  }
+  advance();
 });
 function bonusTrain(){
   const L=G.L; const demand={};
@@ -1038,11 +1114,38 @@ function doContinue(){
   busy=false; updateHint(); startTicker();
   toast('이어가기! 열차 1대 추가');
 }
-$('#adContinueBtn').addEventListener('click',()=>{
-  $('#overOverlay').classList.remove('on');
+/* 웹에서 쓰는 더미 광고 화면. APK 에서는 실제 보상형 광고로 대체된다. */
+function showDemoAdOverlay(){
   const btn=$('#adCloseBtn'); btn.disabled=true; let n=3; btn.textContent=n;
   $('#adOverlay').classList.add('on');
   const iv=setInterval(()=>{ n--; if(n<=0){ clearInterval(iv); btn.disabled=false; btn.textContent='닫고 이어하기'; } else { btn.textContent=n; } },1000);
+}
+$('#adContinueBtn').addEventListener('click',()=>{
+  const NS=window.NS_NATIVE;
+  const adBtn=$('#adContinueBtn');
+
+  // 웹: 기존 더미 광고 그대로
+  if(!NS || !NS.available){
+    $('#overOverlay').classList.remove('on');
+    showDemoAdOverlay();
+    return;
+  }
+
+  // APK: 실제 보상형 광고. 아직 로드 전이면 게임오버 화면을 유지한 채 안내만 한다.
+  if(!NS.isRewardedReady()){
+    toast('광고를 불러오는 중이에요. 잠시 후 다시 눌러 주세요');
+    return;
+  }
+
+  adBtn.disabled=true; adBtn.textContent='광고 여는 중…';
+  $('#overOverlay').classList.remove('on');
+  NS.showRewardedAd(res=>{
+    adBtn.disabled=false; adBtn.textContent='광고 보고 이어하기';
+    if(res && res.ok){ doContinue(); return; }
+    // 끝까지 보지 않았거나 재생 실패 → 보상 없이 게임오버 화면으로 복귀
+    $('#overOverlay').classList.add('on');
+    toast(res && res.reason==='dismissed' ? '광고를 끝까지 봐야 이어할 수 있어요' : '광고를 불러오지 못했어요');
+  });
 });
 $('#adCloseBtn').addEventListener('click',()=>{ if($('#adCloseBtn').disabled)return; $('#adOverlay').classList.remove('on'); doContinue(); });
 $('#retryBtn').addEventListener('click',()=>{ $('#overOverlay').classList.remove('on'); show('#game'); startLevel(levelIdx); });

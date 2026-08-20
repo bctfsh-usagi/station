@@ -1,0 +1,105 @@
+name: Android APK
+
+on:
+  push:
+    branches:
+      - main
+      - 'claude/**'
+    paths:
+      - 'android/**'
+      - 'index.html'
+      - 'assets/**'
+      - '.github/workflows/android.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Create release keystore (only if signing secrets are set)
+        id: signing
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          if [ -z "$KEYSTORE_BASE64" ]; then
+            echo "no signing secrets; release build will be skipped"
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "$KEYSTORE_BASE64" | base64 -d > android/release.jks
+          cat > android/keystore.properties <<EOF
+          storeFile=release.jks
+          storePassword=$KEYSTORE_PASSWORD
+          keyAlias=$KEY_ALIAS
+          keyPassword=$KEY_PASSWORD
+          EOF
+          echo "enabled=true" >> "$GITHUB_OUTPUT"
+
+      - name: Apply AdMob / Hive settings from repository secrets
+        env:
+          ADMOB_APP_ID: ${{ secrets.ADMOB_APP_ID }}
+          ADMOB_REWARDED_UNIT_ID: ${{ secrets.ADMOB_REWARDED_UNIT_ID }}
+          ADMOB_INTERSTITIAL_UNIT_ID: ${{ secrets.ADMOB_INTERSTITIAL_UNIT_ID }}
+          HIVE_APP_ID: ${{ secrets.HIVE_APP_ID }}
+          HIVE_ZONE: ${{ secrets.HIVE_ZONE }}
+          HIVE_GOOGLE_SERVER_CLIENT_ID: ${{ secrets.HIVE_GOOGLE_SERVER_CLIENT_ID }}
+        run: |
+          # 시크릿이 비어 있으면 gradle.properties 의 기본값(= 구글 테스트 광고 / Hive 비활성)이 그대로 쓰인다.
+          {
+            [ -n "$ADMOB_APP_ID" ]                  && echo "admob.appId=$ADMOB_APP_ID"
+            [ -n "$ADMOB_REWARDED_UNIT_ID" ]        && echo "admob.rewardedUnitId=$ADMOB_REWARDED_UNIT_ID"
+            [ -n "$ADMOB_INTERSTITIAL_UNIT_ID" ]    && echo "admob.interstitialUnitId=$ADMOB_INTERSTITIAL_UNIT_ID"
+            [ -n "$HIVE_APP_ID" ]                   && echo "hive.appId=$HIVE_APP_ID"
+            [ -n "$HIVE_ZONE" ]                     && echo "hive.zone=$HIVE_ZONE"
+            [ -n "$HIVE_GOOGLE_SERVER_CLIENT_ID" ]  && echo "hive.googleServerClientId=$HIVE_GOOGLE_SERVER_CLIENT_ID"
+            true
+          } >> android/gradle.properties
+
+      - name: Build debug APK
+        working-directory: android
+        run: ./gradlew --no-daemon assembleDebug
+
+      - name: Upload debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: nextstop-debug-apk
+          path: android/app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
+
+      - name: Build release APK and AAB
+        if: steps.signing.outputs.enabled == 'true'
+        working-directory: android
+        run: ./gradlew --no-daemon assembleRelease bundleRelease
+
+      - name: Upload release artifacts
+        if: steps.signing.outputs.enabled == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: nextstop-release
+          path: |
+            android/app/build/outputs/apk/release/*.apk
+            android/app/build/outputs/bundle/release/*.aab
+          if-no-files-found: error
+
+      - name: Remove signing material
+        if: always()
+        run: rm -f android/release.jks android/keystore.properties

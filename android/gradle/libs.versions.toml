@@ -1,0 +1,22 @@
+[versions]
+agp = "8.7.3"
+kotlin = "2.1.21"
+coreKtx = "1.13.1"
+appcompat = "1.7.0"
+webkit = "1.11.0"
+playServicesAds = "23.6.0"
+userMessaging = "3.1.0"
+hive = "26.6.0"
+
+[libraries]
+androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+androidx-webkit = { group = "androidx.webkit", name = "webkit", version.ref = "webkit" }
+play-services-ads = { group = "com.google.android.gms", name = "play-services-ads", version.ref = "playServicesAds" }
+user-messaging-platform = { group = "com.google.android.ump", name = "user-messaging-platform", version.ref = "userMessaging" }
+hive-sdk = { group = "com.com2us.android.hive", name = "hive-sdk", version.ref = "hive" }
+hive-authv4-google-signin = { group = "com.com2us.android.hive", name = "hive-authv4-provider-google-signin", version.ref = "hive" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }

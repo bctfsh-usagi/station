@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- index.html 의 theme-color 와 맞춘 값. 로딩 중 흰 화면 깜빡임을 막는다. -->
+    <color name="game_background">#0E2235</color>
+</resources>
