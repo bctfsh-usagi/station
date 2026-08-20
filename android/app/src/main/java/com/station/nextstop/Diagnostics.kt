@@ -23,9 +23,17 @@ object Diagnostics {
 
     /** Hive 통신·초기화와 관련된 줄만 남긴다. 전체 로그는 길어서 붙여넣기가 어렵다. */
     private val INTERESTING = Regex(
-        "HIVE|hive|AuthV4|provision|metadata-init|qpyou|withhive|NextStop|Emulator",
+        "HIVE|hive|AuthV4|provision|metadata-init|NextStop|Emulator|oauth",
         RegexOption.IGNORE_CASE
     )
+
+    /**
+     * 응답에 실린 Hive 전역 도메인 화이트리스트는 수만 자에 달해 정작 필요한 줄을 밀어낸다.
+     * 이런 잡음 줄은 통째로 버린다.
+     */
+    private val NOISE = Regex("\"protocol\"\\s*:|whiteListDomains|chatty|expire \\d+ line")
+
+    private const val MAX_LINE_CHARS = 400
 
     /**
      * 최근 로그를 모아 문자열로 돌려준다.
@@ -44,6 +52,8 @@ object Diagnostics {
 
         val filtered = raw.lineSequence()
             .filter { INTERESTING.containsMatchIn(it) }
+            .filterNot { NOISE.containsMatchIn(it) }
+            .map { if (it.length > MAX_LINE_CHARS) it.take(MAX_LINE_CHARS) + " …(잘림)" else it }
             .toList()
             .takeLast(MAX_LINES)
             .joinToString("\n")
