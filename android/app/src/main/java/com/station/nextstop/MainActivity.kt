@@ -44,8 +44,22 @@ class MainActivity : AppCompatActivity(), NativeBridge.Host {
     override lateinit var hive: HiveManager
 
     @SuppressLint("SetJavaScriptEnabled")
+    /** 직전 실행이 Hive 때문에 죽었으면 이번 실행은 Hive 를 건너뛴다. */
+    private var skipHiveDueToCrash = false
+    private var lastCrashReport: String? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // 스택 트레이스를 남겨야 시작 직후 죽는 문제를 볼 수 있다. Hive 초기화보다 먼저 건다.
+        CrashReporter.install(this)
+        lastCrashReport = CrashReporter.consume(this)
+        // 같은 크래시로 계속 죽으면 앱을 아예 쓸 수 없다. 한 번 죽었으면 이번엔 Hive 를 끄고 뜬다.
+        skipHiveDueToCrash = lastCrashReport?.contains("com.hive") == true
+        if (skipHiveDueToCrash) {
+            Log.w(TAG, "skipping Hive init: previous launch crashed inside the Hive SDK")
+        }
+
         // Hive SDK 는 Activity 생명주기를 직접 전달받아야 한다.
         HiveActivity.onCreate(this, savedInstanceState)
 
@@ -113,14 +127,18 @@ class MainActivity : AppCompatActivity(), NativeBridge.Host {
         webView.loadUrl(GAME_URL)
 
         ads.start()
-        hive.setup { success, message ->
-            Log.i(TAG, "hive setup: success=$success ($message)")
-            runOnUi {
-                webView.evaluateJavascript(
-                    "window.__nsHiveReady && window.__nsHiveReady(" +
-                        "$success, ${JSONObject.quote(message)});",
-                    null
-                )
+
+        lastCrashReport?.let { report ->
+            // 직전 실행에서 죽었다면 그 내용을 바로 보낼 수 있게 공유 시트를 띄운다.
+            webView.postDelayed({ Diagnostics.shareCrash(this, report) }, 1500)
+        }
+
+        if (skipHiveDueToCrash) {
+            notifyHiveReady(false, "직전 실행이 Hive 에서 종료되어 이번에는 Hive 를 건너뛰었습니다")
+        } else {
+            hive.setup { success, message ->
+                Log.i(TAG, "hive setup: success=$success ($message)")
+                notifyHiveReady(success, message)
             }
         }
 
@@ -132,6 +150,15 @@ class MainActivity : AppCompatActivity(), NativeBridge.Host {
     }
 
     // ------------------------------------------------- NativeBridge.Host
+
+    private fun notifyHiveReady(success: Boolean, message: String) {
+        runOnUi {
+            webView.evaluateJavascript(
+                "window.__nsHiveReady && window.__nsHiveReady($success, ${JSONObject.quote(message)});",
+                null
+            )
+        }
+    }
 
     override fun runOnUi(block: () -> Unit) = runOnUiThread(block)
 

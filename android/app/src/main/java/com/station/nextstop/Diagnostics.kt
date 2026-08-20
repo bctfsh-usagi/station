@@ -97,8 +97,13 @@ object Diagnostics {
         return out
     }
 
+    /** 직전 실행의 크래시 리포트를 로그와 함께 내보낸다. */
+    fun shareCrash(activity: Activity, crashReport: String) {
+        share(activity, prefix = crashReport + "\n\n=== 이번 실행 로그 ===\n")
+    }
+
     /** 공유 시트를 띄워 로그를 밖으로 보낼 수 있게 한다. */
-    fun share(activity: Activity) {
+    fun share(activity: Activity, prefix: String = "") {
         val header = buildString {
             append("=== NextStop 진단 로그 ===\n")
             append("appId=${BuildConfig.HIVE_APP_ID}\n")
@@ -107,7 +112,7 @@ object Diagnostics {
             append("package=${BuildConfig.APPLICATION_ID}\n")
             append("versionName=${BuildConfig.VERSION_NAME}\n\n")
         }
-        val text = header + collect()
+        val text = header + prefix + collect()
 
         // Hive SDK 가 에뮬레이터 탐지 결과를 클립보드에 써넣기 때문에(useLog=true),
         // 사용자가 "복사가 안 된다"고 느끼게 된다. 공유할 때 클립보드도 다시 채워준다.
