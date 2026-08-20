@@ -520,6 +520,7 @@ body{
     hiveEnabled:       function(){ return safe(function(){ return !!(native_ && native_.hiveEnabled()); }, false); },
     hiveCurrentPlayer: function(){ return safe(function(){ return native_ ? JSON.parse(native_.hiveCurrentPlayer()) : {ok:false, reason:'no_native'}; }, {ok:false, reason:'parse_error'}); },
     hiveStatus:        function(){ return safe(function(){ return native_ ? JSON.parse(native_.hiveStatus()) : {}; }, {}); },
+    shareDiagnostics:  function(){ safe(function(){ native_ && native_.shareDiagnostics(); }); },
     hiveSignIn:        function(cb){ callAsync('hiveSignIn', cb); },
     hiveSignInGuest:   function(cb){ callAsync('hiveSignInGuest', cb); },
     hiveSignOut:       function(cb){ callAsync('hiveSignOut', cb); }
@@ -1215,8 +1216,26 @@ $('#retryBtn').addEventListener('click',()=>{ $('#overOverlay').classList.remove
   reveal();                       // 이미 준비된 뒤에 이 스크립트가 도는 경우 대비
   setInterval(reveal, 1500);      // setup 은 비동기라 상태가 바뀌면 따라간다
 
+  // 길게 누르면 Hive SDK 통신 로그를 공유한다.
+  // 화면의 "unknown client" 는 실제 원인을 가리므로 진짜 응답을 봐야 할 때 쓴다.
+  let pressTimer=null, longPressed=false;
+  const startPress=()=>{
+    longPressed=false;
+    pressTimer=setTimeout(()=>{
+      longPressed=true;
+      const NS=window.NS_NATIVE;
+      if(NS && NS.available && NS.shareDiagnostics){ toast('진단 로그를 준비했어요'); NS.shareDiagnostics(); }
+    }, 700);
+  };
+  const cancelPress=()=>{ if(pressTimer){ clearTimeout(pressTimer); pressTimer=null; } };
+  btn.addEventListener('touchstart', e=>{ e.stopPropagation(); startPress(); }, {passive:true});
+  btn.addEventListener('touchend', cancelPress);
+  btn.addEventListener('touchmove', cancelPress);
+  btn.addEventListener('touchcancel', cancelPress);
+
   btn.addEventListener('click', e=>{
     e.stopPropagation();          // 타이틀 화면의 "탭해서 시작"이 같이 눌리지 않게
+    if(longPressed){ longPressed=false; return; }   // 길게 누른 경우는 로그인 아님
     const NS=window.NS_NATIVE;
     if(!NS || !NS.available) return;
 

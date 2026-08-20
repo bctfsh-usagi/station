@@ -135,6 +135,8 @@ class MainActivity : AppCompatActivity(), NativeBridge.Host {
 
     override fun runOnUi(block: () -> Unit) = runOnUiThread(block)
 
+    override fun shareDiagnostics() = Diagnostics.share(this)
+
     override fun resolve(requestId: String, result: JSONObject) {
         val payload = JSONObject.quote(result.toString())
         runOnUiThread {

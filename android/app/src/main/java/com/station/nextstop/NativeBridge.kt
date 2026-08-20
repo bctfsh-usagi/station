@@ -17,6 +17,7 @@ class NativeBridge(private val host: Host) {
     interface Host {
         fun runOnUi(block: () -> Unit)
         fun resolve(requestId: String, result: JSONObject)
+        fun shareDiagnostics()
         val ads: AdsManager
         val hive: HiveManager
     }
@@ -65,6 +66,15 @@ class NativeBridge(private val host: Host) {
 
     @JavascriptInterface
     fun hiveEnabled(): Boolean = host.hive.isEnabled
+
+    /**
+     * Hive SDK 가 남긴 실제 통신 로그를 공유 시트로 내보낸다.
+     * 화면에 보이는 "unknown client" 가 진짜 원인을 가리므로 이게 유일한 단서다.
+     */
+    @JavascriptInterface
+    fun shareDiagnostics() {
+        host.runOnUi { host.shareDiagnostics() }
+    }
 
     /** setup 완료 여부와 마지막 실패 사유. UI 가 버튼 상태를 정하는 데 쓴다. */
     @JavascriptInterface
